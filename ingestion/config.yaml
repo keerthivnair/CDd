@@ -1,0 +1,7 @@
+dataset_path: "ingestion/data/kaggle/"
+replay_speed: 100
+no_delay: false
+
+kafka:
+  bootstrap_servers: "localhost:9092"
+  topic: "social-media-stream"
