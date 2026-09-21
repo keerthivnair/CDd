@@ -1,0 +1,28 @@
+# Task 2 - Spark Structured Streaming configuration.
+# Relative paths are resolved from the repository root (same convention as ingestion/).
+
+kafka:
+  bootstrap_servers: "localhost:9092"
+  topic: "social-media-stream"
+  consumer_group_prefix: "cdd-spark"     # Spark builds unique group ids from this prefix
+  starting_offsets: "earliest"           # "earliest" for replay from the start, "latest" for new data only
+  max_offsets_per_trigger: 20000         # cap on messages per micro-batch (0 = unlimited)
+
+streaming:
+  window_duration: "1 day"               # dataset timestamps are date-only, so daily windows (see README)
+  watermark_duration: "0 seconds"        # date-only + ordered replay: closes a day as soon as the next day arrives (10 minutes would delay it by one extra day)
+  trigger_interval: "5 seconds"
+
+spark:
+  app_name: "COVID-Social-Media-Stream"
+  master: "local[*]"
+  shuffle_partitions: 8
+  session_timezone: "UTC"                # keeps date-only timestamps and window_id reproducible
+  kafka_package: ""                      # empty = auto (spark-sql-kafka-0-10 matching the installed PySpark)
+
+output:
+  checkpoint_location: "checkpoints/spark_stream"
+  output_mode: "append"                  # append = emit each window once, after the watermark closes it
+  sink: "both"                           # console | jsonl | both
+  jsonl_path: "output/windows"
+  console_max_texts: 5                   # texts shown per window in the console preview
