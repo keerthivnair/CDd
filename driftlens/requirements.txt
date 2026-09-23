@@ -1,0 +1,6 @@
+sentence-transformers
+scikit-learn
+scipy
+numpy
+pyyaml
+pytest
