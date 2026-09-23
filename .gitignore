@@ -1,3 +1,6 @@
 checkpoints/
 output/
 windows_full_backup/
+windows_all.jsonl
+__pycache__/
+.pytest_cache/

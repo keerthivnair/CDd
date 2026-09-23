@@ -1,0 +1,28 @@
+# Task 3 - Embedding + DriftLens configuration.
+# Relative paths are resolved from the repository root (same convention as ingestion/ and spark/).
+
+input:
+  # A single JSONL file (e.g. windows_all.jsonl) or Task 2's folder output/windows (batch_id=*/part-*.json)
+  windows_path: "windows_all.jsonl"
+
+embedding:
+  model: "sentence-transformers/all-MiniLM-L6-v2"   # 384-d
+  batch_size: 256
+  device: ""                             # "" = auto (cuda if available), or "cpu" / "cuda"
+  cache_dir: "output/embeddings"         # per-window .npy cache, "" disables it
+
+driftlens:
+  reference_windows: 14                  # first N windows present in the stream (not N calendar days)
+  threshold_fraction: 0.5                # share of reference tweets held out for threshold calibration
+  pca_components: 150
+  window_sample_size: 1000               # tweets per window used for scoring (FDD depends on sample size)
+  n_calibration: 1000                    # random in-distribution windows drawn for calibration
+  percentile: 99                         # threshold = this percentile of calibration FDDs
+  seed: 42
+
+output:
+  reference_path: "output/drift/reference.npz"
+  scores_path: "output/drift/driftlens.jsonl"
+
+follow:
+  poll_seconds: 10                       # --follow: how often to look for new windows
