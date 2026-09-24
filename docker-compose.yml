@@ -1,0 +1,42 @@
+services:
+  influxdb:
+    image: influxdb:2.7-alpine
+    container_name: cdd-influxdb
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminpassword123
+      - DOCKER_INFLUXDB_INIT_ORG=cdd-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=cdd-bucket
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=cdd-super-secret-token
+      - DOCKER_INFLUXDB_INIT_RETENTION=0
+    volumes:
+      - cdd-influxdb-data:/var/lib/influxdb2
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cdd-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=adminpassword123
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/drift_monitoring.json
+    volumes:
+      - cdd-grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - influxdb
+
+volumes:
+  cdd-influxdb-data:
+  cdd-grafana-data:

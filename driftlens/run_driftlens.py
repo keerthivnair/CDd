@@ -82,22 +82,32 @@ def get_detector(cfg: dict, embedder, windows: list, refit: bool) -> tuple:
 
 
 def score_window(dl: DriftLens, embedder, window: dict, ref_ids: set) -> dict:
-    r = dl.score(embedder.embed_window(window), window_id=window["window_id"])
+    t0 = time.perf_counter()
+    emb = embedder.embed_window(window)
+    r = dl.score(emb, window_id=window["window_id"])
+    latency_ms = (time.perf_counter() - t0) * 1000.0
+    n_posts = window.get("post_count", len(window.get("texts", [])))
+    throughput = (n_posts / (latency_ms / 1000.0)) if latency_ms > 0 else 0.0
+
     return {
         "window_id": window["window_id"],
         "window_start": window.get("window_start"),
         "driftlens_score": round(r["driftlens_score"], 6),
         "driftlens_alarm": r["driftlens_alarm"],
         "threshold": round(r["threshold"], 6),
-        "n_posts": window.get("post_count", len(window["texts"])),
+        "n_posts": n_posts,
         "n_used": r["n_used"],
         "is_reference": window["window_id"] in ref_ids,
+        "processing_latency_ms": round(latency_ms, 2),
+        "throughput_posts_per_sec": round(throughput, 2),
     }
 
 
 def log_result(res: dict) -> None:
-    log.info("window=%s score=%.4f threshold=%.4f alarm=%s n=%s%s", res["window_id"], res["driftlens_score"],
-             res["threshold"], res["driftlens_alarm"], res["n_used"], " (reference)" if res["is_reference"] else "")
+    log.info("window=%s score=%.4f threshold=%.4f alarm=%s n=%s latency=%.1fms throughput=%.1fp/s%s",
+             res["window_id"], res["driftlens_score"], res["threshold"], res["driftlens_alarm"],
+             res["n_used"], res.get("processing_latency_ms", 0.0), res.get("throughput_posts_per_sec", 0.0),
+             " (reference)" if res["is_reference"] else "")
 
 
 def main():

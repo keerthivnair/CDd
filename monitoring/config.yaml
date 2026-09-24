@@ -1,0 +1,22 @@
+# Task 4 - InfluxDB and Monitoring Configuration
+# Resolves settings for connecting to InfluxDB and local persistence
+
+influxdb:
+  url: "http://localhost:8086"
+  token: "cdd-super-secret-token"
+  org: "cdd-org"
+  bucket: "cdd-bucket"
+  measurement: "drift_metrics"
+  timeout_ms: 10000
+
+logging:
+  csv_path: "output/drift_results.csv"
+  log_to_csv: true
+  log_to_influx: true
+
+drift:
+  # Baseline threshold from reference calibration phase (PDF Section 4.5)
+  default_threshold: 0.45
+
+system_metrics:
+  collect_cpu_mem: true
