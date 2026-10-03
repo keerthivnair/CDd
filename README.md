@@ -41,6 +41,7 @@ Monitoring / visualization                         [planned]
 | `spark/` | Spark Structured Streaming: cleaning, deduplication, event-time windowing | Implemented |
 | `drift/` | Embedding generation + DriftLens + MCD-DD drift scoring | Implemented |
 | `monitoring/` | InfluxDB + Grafana metrics store and dashboard | Implemented |
+| `experiments/` | Evaluation scenarios (natural, sudden, gradual, volume, no drift) with recorded drift points | Implemented |
 
 Each component has its own README with setup, configuration, and usage details.
 

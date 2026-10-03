@@ -6,3 +6,4 @@ __pycache__/
 .pytest_cache/
 .venv/
 *.pyc
+experiments/scenarios/*/windows.jsonl
