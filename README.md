@@ -39,8 +39,8 @@ Monitoring / visualization                         [planned]
 |---|---|---|
 | `ingestion/` | Kafka producer: loads, validates, and replays the dataset | Implemented |
 | `spark/` | Spark Structured Streaming: cleaning, deduplication, event-time windowing | Implemented |
-| — | Embedding generation and drift scoring | Planned |
-| — | Metrics store and dashboard | Planned |
+| `drift/` | Embedding generation + DriftLens + MCD-DD drift scoring | Implemented |
+| `monitoring/` | InfluxDB + Grafana metrics store and dashboard | Implemented |
 
 Each component has its own README with setup, configuration, and usage details.
 

@@ -59,7 +59,7 @@ def follow_driftlens_output(
 
     while not file_path.exists():
         if not follow:
-            log.error("File %s does not exist. Run Task 3 (driftlens/run_driftlens.py) first.", file_path)
+            log.error("File %s does not exist. Run Task 3 (drift/run_drift.py) first.", file_path)
             return
         log.info("Waiting for Task 3 to create %s...", file_path)
         time.sleep(poll_interval)

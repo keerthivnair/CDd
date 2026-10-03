@@ -8,7 +8,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from driftlens import DriftLens, frechet_distance, gaussian_stats  # noqa: E402
 from embedder import prepare_texts  # noqa: E402
-from run_driftlens import load_windows  # noqa: E402
+from run_drift import load_windows  # noqa: E402
 
 DIM = 32
 

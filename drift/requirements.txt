@@ -4,3 +4,4 @@ scipy
 numpy
 pyyaml
 pytest
+torch

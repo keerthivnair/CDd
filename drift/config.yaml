@@ -1,4 +1,4 @@
-# Task 3 - Embedding + DriftLens configuration.
+# Task 3 - Embedding + DriftLens + MCD-DD configuration.
 # Relative paths are resolved from the repository root (same convention as ingestion/ and spark/).
 
 input:
@@ -19,6 +19,22 @@ driftlens:
   n_calibration: 1000                    # random in-distribution windows drawn for calibration
   percentile: 99                         # threshold = this percentile of calibration FDDs
   seed: 42
+
+mcddd:
+  enabled: true
+  hidden_dim: 128                        # Deep Sets encoder hidden layer width
+  output_dim: 64                         # concept embedding dimensionality
+  lr: 0.001                              # Adam learning rate
+  lambda_gp: 0.1                         # gradient penalty weight (Lipschitz regulariser)
+  lipschitz_k: 1.0                       # target gradient norm
+  eps_small: 0.01                        # noise scale for weak-negative pairs
+  eps_big: 0.1                           # noise scale for strong-negative pairs
+  n_sub_windows: 5                       # sub-windows per window for contrastive pairs
+  sample_set_size: 100                   # items per set in contrastive pairs
+  k_pairs: 5                             # contrastive pairs per sub-window
+  train_epochs: 3                        # gradient steps during offline fitting
+  seed: 42
+  model_path: "output/drift/mcddd.pt"   # saved encoder weights + threshold
 
 output:
   reference_path: "output/drift/reference.npz"

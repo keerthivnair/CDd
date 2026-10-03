@@ -16,11 +16,23 @@ def prepare_texts(texts):
 
 class Embedder:
     def __init__(self, model_name: str, cache_dir: str = "", batch_size: int = 256, device: str = ""):
+        import torch
         from sentence_transformers import SentenceTransformer
+
+        if not device:
+            if torch.cuda.is_available():
+                try:
+                    _ = torch.zeros(1, device="cuda")
+                    device = "cuda"
+                except Exception as ex:
+                    log.warning("CUDA is detected but unsupported by installed PyTorch (%s); falling back to CPU", ex)
+                    device = "cpu"
+            else:
+                device = "cpu"
 
         self.model_name = model_name
         self.batch_size = batch_size
-        self.model = SentenceTransformer(model_name, device=device or None)
+        self.model = SentenceTransformer(model_name, device=device)
         log.info("Loaded Sentence Transformer '%s' on %s (dim=%s)",
                  model_name, self.model.device, self.model.get_sentence_embedding_dimension())
         self.cache_dir = ""
@@ -40,5 +52,6 @@ class Embedder:
         emb = self.model.encode(texts, batch_size=self.batch_size, normalize_embeddings=True,
                                 convert_to_numpy=True, show_progress_bar=False).astype(np.float32)
         if path:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
             np.save(path, emb)
         return emb

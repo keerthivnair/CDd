@@ -99,7 +99,7 @@ python spark/spark_stream.py --config spark/config.yaml
 
 ### Terminal 5 — DriftLens / Task 3 (Embeddings & Drift Detection)
 ```bash
-python driftlens/run_driftlens.py --config driftlens/config.yaml --follow
+python drift/run_drift.py --config drift/config.yaml --follow
 ```
 *(Embeds windows, calibrates reference, calculates FDD score/alarm, and outputs to `output/drift/driftlens.jsonl`)*
 
