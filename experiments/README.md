@@ -139,4 +139,27 @@ What the scenarios show:
 - **The volume case isolates volume.** DriftLens samples 1000 tweets from every window, so tripling the volume leaves its score flat: 0.0221 before, 0.0222 after.
 - **MCD-DD sees the sudden change but does not alarm.** At window 30 its score is 8.3e-5, about 21× the pre-change median (4e-6) and 6× the pre-change maximum. Its dynamic threshold at that window is 1.7e-4, so no alarm fires. The threshold also grows during online training, from about 1.7e-4 at window 30 to about 6e-3 by the end. This is a finding for whoever tunes MCD-DD; the scenarios themselves are fine. The `gradual` case is harder for MCD-DD by design, because neighbouring windows differ by only ~6%.
 
+### Why MCD-DD gives 0 alarms
+
+The runs themselves are valid. In every scenario MCD-DD is trained from scratch (`--refit`) on the 14 reference windows and scores every window with non-zero scores, and its 10 unit tests pass. Replaying the `sudden` run separately reproduces the same numbers. The zeros come from how `drift/mcddd.py` sets its alarm threshold:
+
+| `sudden` window | MCD-DD score | Threshold | Spread between two 100-tweet samples of one window (95th percentile) |
+|---|---|---|---|
+| 28 | 1.6e-6 | 3.4e-4 | 2.1e-4 |
+| 29 | 1.3e-5 | 2.4e-4 | 3.0e-4 |
+| **30 (drift)** | **8.3e-5** | 1.7e-4 | 2.5e-4 |
+| 31 | 3.4e-6 | 2.9e-4 | 4.4e-4 |
+| 59 | 6.7e-5 | 6.2e-3 | 9.3e-3 |
+
+1. **Score and threshold use different sample sizes.** `_detect()` scores the encoder output of a whole 1000-tweet window against the whole previous window. The threshold (`_train_step()`) is the 95th percentile of distances between two 100-tweet samples taken *from the same window*. Mean-pooling over 100 items is much noisier than over 1000, so the threshold sits at small-sample noise level (last column ≈ threshold column). The drift at window 30 is ~20× the normal window-to-window score, but still below that threshold.
+2. **The threshold inflates during the stream.** `score()` takes a training step on every incoming window. Each step pushes all encoder distances further apart, so the threshold grows from 1.4e-4 to 6.2e-3 (about 40×) while real changes stay around 1e-4.
+3. **The encoder is barely trained.** It gets 3 steps at fit and 1 per window after that, and the "strong negative" pairs add Gaussian noise with σ = 0.1 to 384-d unit vectors (noise norm ≈ 2, larger than the vector itself). So the encoder mostly learns to spot added noise rather than topic change. Even at the 100-tweet scale, the change at window 30 (median cross-window distance 1.0e-4) stays inside the same-window noise.
+
+Possible fixes for the MCD-DD owner, none applied here:
+- Calibrate the threshold at the same set size used for scoring, or score 100-tweet sample sets, as the threshold does.
+- Freeze or normalise the threshold after the offline fit instead of updating it every window.
+- Train for more steps, and reconsider `eps_big`.
+
+Rerun the five scenario configs after any change to compare.
+
 Runtime: each controlled scenario takes about 2–4 minutes. `natural` takes about 18 minutes, because DriftLens calibrates a new threshold (about 30 s) for every distinct window size under 1000.
