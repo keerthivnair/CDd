@@ -1,0 +1,69 @@
+{
+  "seed": 42,
+  "stream": {
+    "n_windows": 60,
+    "reference_windows": 14,
+    "window_size": 1000,
+    "change_point": 30,
+    "gradual_length": 15,
+    "volume_factor": 3,
+    "start_date": "2000-01-01"
+  },
+  "concepts": {
+    "old": {
+      "start": "2020-04-19",
+      "end": "2020-05-31"
+    },
+    "new": {
+      "start": "2021-04-26",
+      "end": "2021-06-26"
+    }
+  },
+  "scenarios": [
+    {
+      "scenario": "natural",
+      "n_windows": 153,
+      "n_posts": 410455,
+      "concept_drift": null,
+      "drift_start_position": null,
+      "drift_end_position": null,
+      "volume_change_position": null
+    },
+    {
+      "scenario": "sudden",
+      "n_windows": 60,
+      "n_posts": 60000,
+      "concept_drift": true,
+      "drift_start_position": 30,
+      "drift_end_position": 30,
+      "volume_change_position": null
+    },
+    {
+      "scenario": "gradual",
+      "n_windows": 60,
+      "n_posts": 60000,
+      "concept_drift": true,
+      "drift_start_position": 30,
+      "drift_end_position": 45,
+      "volume_change_position": null
+    },
+    {
+      "scenario": "volume",
+      "n_windows": 60,
+      "n_posts": 120000,
+      "concept_drift": false,
+      "drift_start_position": null,
+      "drift_end_position": null,
+      "volume_change_position": 30
+    },
+    {
+      "scenario": "no_drift",
+      "n_windows": 60,
+      "n_posts": 60000,
+      "concept_drift": false,
+      "drift_start_position": null,
+      "drift_end_position": null,
+      "volume_change_position": null
+    }
+  ]
+}

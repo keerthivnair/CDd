@@ -1,0 +1,362 @@
+{
+  "reference_windows": 14,
+  "tolerance": 3,
+  "scenarios": {
+    "natural": {
+      "ground_truth": {
+        "concept_drift": null,
+        "drift_start": null,
+        "drift_end": null,
+        "volume_change": null,
+        "expected_alarm_windows": "unknown (real data)",
+        "note": "first 14 windows are the detector reference period"
+      },
+      "metrics": {
+        "driftlens": {
+          "alarms": 122,
+          "stream_windows": 139,
+          "alarm_rate": 0.8777,
+          "alarm_positions": [
+            18,
+            19,
+            28,
+            29,
+            32,
+            34,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            129,
+            130,
+            131,
+            132,
+            133,
+            134,
+            135,
+            136,
+            137,
+            138,
+            139,
+            140,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152
+          ]
+        },
+        "mcddd": {
+          "alarms": 2,
+          "stream_windows": 139,
+          "alarm_rate": 0.0144,
+          "alarm_positions": [
+            87,
+            103
+          ]
+        }
+      }
+    },
+    "sudden": {
+      "ground_truth": {
+        "concept_drift": true,
+        "drift_start": {
+          "position": 30,
+          "window_id": 10987,
+          "window_start": "2000-01-31T00:00:00"
+        },
+        "drift_end": {
+          "position": 30,
+          "window_id": 10987,
+          "window_start": "2000-01-31T00:00:00"
+        },
+        "volume_change": null,
+        "expected_alarm_windows": "positions 30-59"
+      },
+      "metrics": {
+        "driftlens": {
+          "alarms": 30,
+          "stream_windows": 46,
+          "alarm_rate": 0.6522,
+          "alarm_positions": [
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59
+          ],
+          "false_alarms_before_drift": 0,
+          "false_alarm_rate_before_drift": 0.0,
+          "first_alarm_after_drift": 30,
+          "detection_delay": 0,
+          "detected_within_tolerance": true,
+          "alarm_rate_after_drift": 1.0
+        },
+        "mcddd": {
+          "alarms": 0,
+          "stream_windows": 46,
+          "alarm_rate": 0.0,
+          "alarm_positions": [],
+          "false_alarms_before_drift": 0,
+          "false_alarm_rate_before_drift": 0.0,
+          "first_alarm_after_drift": null,
+          "detection_delay": null,
+          "detected_within_tolerance": false,
+          "alarm_rate_after_drift": 0.0
+        }
+      }
+    },
+    "gradual": {
+      "ground_truth": {
+        "concept_drift": true,
+        "drift_start": {
+          "position": 30,
+          "window_id": 10987,
+          "window_start": "2000-01-31T00:00:00"
+        },
+        "drift_end": {
+          "position": 45,
+          "window_id": 11002,
+          "window_start": "2000-02-15T00:00:00"
+        },
+        "volume_change": null,
+        "expected_alarm_windows": "positions 30-59",
+        "note": "positions 30-44 mix old/new tweets; position 45 is the first 100% new window"
+      },
+      "metrics": {
+        "driftlens": {
+          "alarms": 28,
+          "stream_windows": 46,
+          "alarm_rate": 0.6087,
+          "alarm_positions": [
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59
+          ],
+          "false_alarms_before_drift": 0,
+          "false_alarm_rate_before_drift": 0.0,
+          "first_alarm_after_drift": 32,
+          "detection_delay": 2,
+          "detected_within_tolerance": true,
+          "alarm_rate_after_drift": 0.9333
+        },
+        "mcddd": {
+          "alarms": 0,
+          "stream_windows": 46,
+          "alarm_rate": 0.0,
+          "alarm_positions": [],
+          "false_alarms_before_drift": 0,
+          "false_alarm_rate_before_drift": 0.0,
+          "first_alarm_after_drift": null,
+          "detection_delay": null,
+          "detected_within_tolerance": false,
+          "alarm_rate_after_drift": 0.0
+        }
+      }
+    },
+    "volume": {
+      "ground_truth": {
+        "concept_drift": false,
+        "drift_start": null,
+        "drift_end": null,
+        "volume_change": {
+          "position": 30,
+          "window_id": 10987,
+          "window_start": "2000-01-31T00:00:00",
+          "factor": 3
+        },
+        "expected_alarm_windows": "none"
+      },
+      "metrics": {
+        "driftlens": {
+          "alarms": 0,
+          "stream_windows": 46,
+          "alarm_rate": 0.0,
+          "alarm_positions": [],
+          "false_alarm_rate_before_volume_change": 0.0,
+          "false_alarm_rate_after_volume_change": 0.0,
+          "alarm_at_volume_change": false
+        },
+        "mcddd": {
+          "alarms": 0,
+          "stream_windows": 46,
+          "alarm_rate": 0.0,
+          "alarm_positions": [],
+          "false_alarm_rate_before_volume_change": 0.0,
+          "false_alarm_rate_after_volume_change": 0.0,
+          "alarm_at_volume_change": false
+        }
+      }
+    },
+    "no_drift": {
+      "ground_truth": {
+        "concept_drift": false,
+        "drift_start": null,
+        "drift_end": null,
+        "volume_change": null,
+        "expected_alarm_windows": "none"
+      },
+      "metrics": {
+        "driftlens": {
+          "alarms": 0,
+          "stream_windows": 46,
+          "alarm_rate": 0.0,
+          "alarm_positions": [],
+          "false_alarm_rate": 0.0
+        },
+        "mcddd": {
+          "alarms": 0,
+          "stream_windows": 46,
+          "alarm_rate": 0.0,
+          "alarm_positions": [],
+          "false_alarm_rate": 0.0
+        }
+      }
+    }
+  }
+}

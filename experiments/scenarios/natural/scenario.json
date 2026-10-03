@@ -1,0 +1,1089 @@
+{
+  "scenario": "natural",
+  "description": "Original COVID windows in chronological order, unchanged. No injected change; the true drift points are unknown.",
+  "windows_path": "windows_all.jsonl",
+  "windows_sha256": "e16fe8449e1996aa8b7f43705ce32a1eb6383c54e4b62b4d12a4d7b51a81b57a",
+  "n_windows": 153,
+  "n_posts": 410455,
+  "ground_truth": {
+    "concept_drift": null,
+    "drift_start": null,
+    "drift_end": null,
+    "volume_change": null,
+    "expected_alarm_windows": "unknown (real data)",
+    "note": "first 14 windows are the detector reference period"
+  },
+  "windows": [
+    {
+      "position": 0,
+      "window_id": 18371,
+      "window_start": "2020-04-19T00:00:00",
+      "phase": "reference",
+      "n_posts": 339
+    },
+    {
+      "position": 1,
+      "window_id": 18374,
+      "window_start": "2020-04-22T00:00:00",
+      "phase": "reference",
+      "n_posts": 896
+    },
+    {
+      "position": 2,
+      "window_id": 18375,
+      "window_start": "2020-04-23T00:00:00",
+      "phase": "reference",
+      "n_posts": 163
+    },
+    {
+      "position": 3,
+      "window_id": 18376,
+      "window_start": "2020-04-24T00:00:00",
+      "phase": "reference",
+      "n_posts": 5323
+    },
+    {
+      "position": 4,
+      "window_id": 18377,
+      "window_start": "2020-04-25T00:00:00",
+      "phase": "reference",
+      "n_posts": 6178
+    },
+    {
+      "position": 5,
+      "window_id": 18378,
+      "window_start": "2020-04-26T00:00:00",
+      "phase": "reference",
+      "n_posts": 4435
+    },
+    {
+      "position": 6,
+      "window_id": 18379,
+      "window_start": "2020-04-27T00:00:00",
+      "phase": "reference",
+      "n_posts": 3028
+    },
+    {
+      "position": 7,
+      "window_id": 18380,
+      "window_start": "2020-04-28T00:00:00",
+      "phase": "reference",
+      "n_posts": 3837
+    },
+    {
+      "position": 8,
+      "window_id": 18381,
+      "window_start": "2020-04-29T00:00:00",
+      "phase": "reference",
+      "n_posts": 3847
+    },
+    {
+      "position": 9,
+      "window_id": 18382,
+      "window_start": "2020-04-30T00:00:00",
+      "phase": "reference",
+      "n_posts": 3234
+    },
+    {
+      "position": 10,
+      "window_id": 18383,
+      "window_start": "2020-05-01T00:00:00",
+      "phase": "reference",
+      "n_posts": 4444
+    },
+    {
+      "position": 11,
+      "window_id": 18384,
+      "window_start": "2020-05-02T00:00:00",
+      "phase": "reference",
+      "n_posts": 2178
+    },
+    {
+      "position": 12,
+      "window_id": 18385,
+      "window_start": "2020-05-03T00:00:00",
+      "phase": "reference",
+      "n_posts": 4570
+    },
+    {
+      "position": 13,
+      "window_id": 18386,
+      "window_start": "2020-05-04T00:00:00",
+      "phase": "reference",
+      "n_posts": 7165
+    },
+    {
+      "position": 14,
+      "window_id": 18387,
+      "window_start": "2020-05-05T00:00:00",
+      "phase": "stream",
+      "n_posts": 4949
+    },
+    {
+      "position": 15,
+      "window_id": 18388,
+      "window_start": "2020-05-06T00:00:00",
+      "phase": "stream",
+      "n_posts": 4575
+    },
+    {
+      "position": 16,
+      "window_id": 18389,
+      "window_start": "2020-05-07T00:00:00",
+      "phase": "stream",
+      "n_posts": 4553
+    },
+    {
+      "position": 17,
+      "window_id": 18390,
+      "window_start": "2020-05-08T00:00:00",
+      "phase": "stream",
+      "n_posts": 3984
+    },
+    {
+      "position": 18,
+      "window_id": 18391,
+      "window_start": "2020-05-09T00:00:00",
+      "phase": "stream",
+      "n_posts": 5857
+    },
+    {
+      "position": 19,
+      "window_id": 18392,
+      "window_start": "2020-05-10T00:00:00",
+      "phase": "stream",
+      "n_posts": 3594
+    },
+    {
+      "position": 20,
+      "window_id": 18393,
+      "window_start": "2020-05-11T00:00:00",
+      "phase": "stream",
+      "n_posts": 4032
+    },
+    {
+      "position": 21,
+      "window_id": 18394,
+      "window_start": "2020-05-12T00:00:00",
+      "phase": "stream",
+      "n_posts": 3994
+    },
+    {
+      "position": 22,
+      "window_id": 18395,
+      "window_start": "2020-05-13T00:00:00",
+      "phase": "stream",
+      "n_posts": 2595
+    },
+    {
+      "position": 23,
+      "window_id": 18396,
+      "window_start": "2020-05-14T00:00:00",
+      "phase": "stream",
+      "n_posts": 3356
+    },
+    {
+      "position": 24,
+      "window_id": 18397,
+      "window_start": "2020-05-15T00:00:00",
+      "phase": "stream",
+      "n_posts": 2035
+    },
+    {
+      "position": 25,
+      "window_id": 18398,
+      "window_start": "2020-05-16T00:00:00",
+      "phase": "stream",
+      "n_posts": 4044
+    },
+    {
+      "position": 26,
+      "window_id": 18399,
+      "window_start": "2020-05-17T00:00:00",
+      "phase": "stream",
+      "n_posts": 1256
+    },
+    {
+      "position": 27,
+      "window_id": 18400,
+      "window_start": "2020-05-18T00:00:00",
+      "phase": "stream",
+      "n_posts": 1828
+    },
+    {
+      "position": 28,
+      "window_id": 18401,
+      "window_start": "2020-05-19T00:00:00",
+      "phase": "stream",
+      "n_posts": 710
+    },
+    {
+      "position": 29,
+      "window_id": 18402,
+      "window_start": "2020-05-20T00:00:00",
+      "phase": "stream",
+      "n_posts": 1445
+    },
+    {
+      "position": 30,
+      "window_id": 18404,
+      "window_start": "2020-05-22T00:00:00",
+      "phase": "stream",
+      "n_posts": 5103
+    },
+    {
+      "position": 31,
+      "window_id": 18405,
+      "window_start": "2020-05-23T00:00:00",
+      "phase": "stream",
+      "n_posts": 5600
+    },
+    {
+      "position": 32,
+      "window_id": 18406,
+      "window_start": "2020-05-24T00:00:00",
+      "phase": "stream",
+      "n_posts": 4315
+    },
+    {
+      "position": 33,
+      "window_id": 18407,
+      "window_start": "2020-05-25T00:00:00",
+      "phase": "stream",
+      "n_posts": 4804
+    },
+    {
+      "position": 34,
+      "window_id": 18408,
+      "window_start": "2020-05-26T00:00:00",
+      "phase": "stream",
+      "n_posts": 861
+    },
+    {
+      "position": 35,
+      "window_id": 18409,
+      "window_start": "2020-05-27T00:00:00",
+      "phase": "stream",
+      "n_posts": 965
+    },
+    {
+      "position": 36,
+      "window_id": 18410,
+      "window_start": "2020-05-28T00:00:00",
+      "phase": "stream",
+      "n_posts": 1047
+    },
+    {
+      "position": 37,
+      "window_id": 18411,
+      "window_start": "2020-05-29T00:00:00",
+      "phase": "stream",
+      "n_posts": 648
+    },
+    {
+      "position": 38,
+      "window_id": 18412,
+      "window_start": "2020-05-30T00:00:00",
+      "phase": "stream",
+      "n_posts": 1242
+    },
+    {
+      "position": 39,
+      "window_id": 18413,
+      "window_start": "2020-05-31T00:00:00",
+      "phase": "stream",
+      "n_posts": 819
+    },
+    {
+      "position": 40,
+      "window_id": 18414,
+      "window_start": "2020-06-01T00:00:00",
+      "phase": "stream",
+      "n_posts": 1201
+    },
+    {
+      "position": 41,
+      "window_id": 18416,
+      "window_start": "2020-06-03T00:00:00",
+      "phase": "stream",
+      "n_posts": 807
+    },
+    {
+      "position": 42,
+      "window_id": 18417,
+      "window_start": "2020-06-04T00:00:00",
+      "phase": "stream",
+      "n_posts": 812
+    },
+    {
+      "position": 43,
+      "window_id": 18418,
+      "window_start": "2020-06-05T00:00:00",
+      "phase": "stream",
+      "n_posts": 1065
+    },
+    {
+      "position": 44,
+      "window_id": 18419,
+      "window_start": "2020-06-06T00:00:00",
+      "phase": "stream",
+      "n_posts": 1144
+    },
+    {
+      "position": 45,
+      "window_id": 18420,
+      "window_start": "2020-06-07T00:00:00",
+      "phase": "stream",
+      "n_posts": 922
+    },
+    {
+      "position": 46,
+      "window_id": 18421,
+      "window_start": "2020-06-08T00:00:00",
+      "phase": "stream",
+      "n_posts": 209
+    },
+    {
+      "position": 47,
+      "window_id": 18422,
+      "window_start": "2020-06-09T00:00:00",
+      "phase": "stream",
+      "n_posts": 1122
+    },
+    {
+      "position": 48,
+      "window_id": 18423,
+      "window_start": "2020-06-10T00:00:00",
+      "phase": "stream",
+      "n_posts": 991
+    },
+    {
+      "position": 49,
+      "window_id": 18424,
+      "window_start": "2020-06-11T00:00:00",
+      "phase": "stream",
+      "n_posts": 1165
+    },
+    {
+      "position": 50,
+      "window_id": 18425,
+      "window_start": "2020-06-12T00:00:00",
+      "phase": "stream",
+      "n_posts": 1304
+    },
+    {
+      "position": 51,
+      "window_id": 18426,
+      "window_start": "2020-06-13T00:00:00",
+      "phase": "stream",
+      "n_posts": 1003
+    },
+    {
+      "position": 52,
+      "window_id": 18427,
+      "window_start": "2020-06-14T00:00:00",
+      "phase": "stream",
+      "n_posts": 812
+    },
+    {
+      "position": 53,
+      "window_id": 18428,
+      "window_start": "2020-06-15T00:00:00",
+      "phase": "stream",
+      "n_posts": 899
+    },
+    {
+      "position": 54,
+      "window_id": 18430,
+      "window_start": "2020-06-17T00:00:00",
+      "phase": "stream",
+      "n_posts": 1026
+    },
+    {
+      "position": 55,
+      "window_id": 18432,
+      "window_start": "2020-06-19T00:00:00",
+      "phase": "stream",
+      "n_posts": 850
+    },
+    {
+      "position": 56,
+      "window_id": 18433,
+      "window_start": "2020-06-20T00:00:00",
+      "phase": "stream",
+      "n_posts": 721
+    },
+    {
+      "position": 57,
+      "window_id": 18494,
+      "window_start": "2020-08-20T00:00:00",
+      "phase": "stream",
+      "n_posts": 1512
+    },
+    {
+      "position": 58,
+      "window_id": 18495,
+      "window_start": "2020-08-21T00:00:00",
+      "phase": "stream",
+      "n_posts": 836
+    },
+    {
+      "position": 59,
+      "window_id": 18496,
+      "window_start": "2020-08-22T00:00:00",
+      "phase": "stream",
+      "n_posts": 1342
+    },
+    {
+      "position": 60,
+      "window_id": 18497,
+      "window_start": "2020-08-23T00:00:00",
+      "phase": "stream",
+      "n_posts": 946
+    },
+    {
+      "position": 61,
+      "window_id": 18498,
+      "window_start": "2020-08-24T00:00:00",
+      "phase": "stream",
+      "n_posts": 1095
+    },
+    {
+      "position": 62,
+      "window_id": 18500,
+      "window_start": "2020-08-26T00:00:00",
+      "phase": "stream",
+      "n_posts": 1308
+    },
+    {
+      "position": 63,
+      "window_id": 18502,
+      "window_start": "2020-08-28T00:00:00",
+      "phase": "stream",
+      "n_posts": 792
+    },
+    {
+      "position": 64,
+      "window_id": 18503,
+      "window_start": "2020-08-29T00:00:00",
+      "phase": "stream",
+      "n_posts": 1629
+    },
+    {
+      "position": 65,
+      "window_id": 18504,
+      "window_start": "2020-08-30T00:00:00",
+      "phase": "stream",
+      "n_posts": 1516
+    },
+    {
+      "position": 66,
+      "window_id": 18505,
+      "window_start": "2020-08-31T00:00:00",
+      "phase": "stream",
+      "n_posts": 2104
+    },
+    {
+      "position": 67,
+      "window_id": 18506,
+      "window_start": "2020-09-01T00:00:00",
+      "phase": "stream",
+      "n_posts": 2897
+    },
+    {
+      "position": 68,
+      "window_id": 18507,
+      "window_start": "2020-09-02T00:00:00",
+      "phase": "stream",
+      "n_posts": 3055
+    },
+    {
+      "position": 69,
+      "window_id": 18508,
+      "window_start": "2020-09-03T00:00:00",
+      "phase": "stream",
+      "n_posts": 1457
+    },
+    {
+      "position": 70,
+      "window_id": 18511,
+      "window_start": "2020-09-06T00:00:00",
+      "phase": "stream",
+      "n_posts": 2856
+    },
+    {
+      "position": 71,
+      "window_id": 18517,
+      "window_start": "2020-09-12T00:00:00",
+      "phase": "stream",
+      "n_posts": 1200
+    },
+    {
+      "position": 72,
+      "window_id": 18518,
+      "window_start": "2020-09-13T00:00:00",
+      "phase": "stream",
+      "n_posts": 1185
+    },
+    {
+      "position": 73,
+      "window_id": 18520,
+      "window_start": "2020-09-15T00:00:00",
+      "phase": "stream",
+      "n_posts": 1460
+    },
+    {
+      "position": 74,
+      "window_id": 18522,
+      "window_start": "2020-09-17T00:00:00",
+      "phase": "stream",
+      "n_posts": 1864
+    },
+    {
+      "position": 75,
+      "window_id": 18524,
+      "window_start": "2020-09-19T00:00:00",
+      "phase": "stream",
+      "n_posts": 1205
+    },
+    {
+      "position": 76,
+      "window_id": 18525,
+      "window_start": "2020-09-20T00:00:00",
+      "phase": "stream",
+      "n_posts": 3157
+    },
+    {
+      "position": 77,
+      "window_id": 18527,
+      "window_start": "2020-09-22T00:00:00",
+      "phase": "stream",
+      "n_posts": 3092
+    },
+    {
+      "position": 78,
+      "window_id": 18528,
+      "window_start": "2020-09-23T00:00:00",
+      "phase": "stream",
+      "n_posts": 839
+    },
+    {
+      "position": 79,
+      "window_id": 18529,
+      "window_start": "2020-09-24T00:00:00",
+      "phase": "stream",
+      "n_posts": 2890
+    },
+    {
+      "position": 80,
+      "window_id": 18530,
+      "window_start": "2020-09-25T00:00:00",
+      "phase": "stream",
+      "n_posts": 3593
+    },
+    {
+      "position": 81,
+      "window_id": 18531,
+      "window_start": "2020-09-26T00:00:00",
+      "phase": "stream",
+      "n_posts": 2757
+    },
+    {
+      "position": 82,
+      "window_id": 18532,
+      "window_start": "2020-09-27T00:00:00",
+      "phase": "stream",
+      "n_posts": 7040
+    },
+    {
+      "position": 83,
+      "window_id": 18533,
+      "window_start": "2020-09-28T00:00:00",
+      "phase": "stream",
+      "n_posts": 2407
+    },
+    {
+      "position": 84,
+      "window_id": 18534,
+      "window_start": "2020-09-29T00:00:00",
+      "phase": "stream",
+      "n_posts": 2460
+    },
+    {
+      "position": 85,
+      "window_id": 18535,
+      "window_start": "2020-09-30T00:00:00",
+      "phase": "stream",
+      "n_posts": 7028
+    },
+    {
+      "position": 86,
+      "window_id": 18536,
+      "window_start": "2020-10-01T00:00:00",
+      "phase": "stream",
+      "n_posts": 6166
+    },
+    {
+      "position": 87,
+      "window_id": 18537,
+      "window_start": "2020-10-02T00:00:00",
+      "phase": "stream",
+      "n_posts": 413
+    },
+    {
+      "position": 88,
+      "window_id": 18538,
+      "window_start": "2020-10-03T00:00:00",
+      "phase": "stream",
+      "n_posts": 3159
+    },
+    {
+      "position": 89,
+      "window_id": 18539,
+      "window_start": "2020-10-04T00:00:00",
+      "phase": "stream",
+      "n_posts": 3625
+    },
+    {
+      "position": 90,
+      "window_id": 18540,
+      "window_start": "2020-10-05T00:00:00",
+      "phase": "stream",
+      "n_posts": 1334
+    },
+    {
+      "position": 91,
+      "window_id": 18541,
+      "window_start": "2020-10-06T00:00:00",
+      "phase": "stream",
+      "n_posts": 3223
+    },
+    {
+      "position": 92,
+      "window_id": 18542,
+      "window_start": "2020-10-07T00:00:00",
+      "phase": "stream",
+      "n_posts": 1613
+    },
+    {
+      "position": 93,
+      "window_id": 18543,
+      "window_start": "2020-10-08T00:00:00",
+      "phase": "stream",
+      "n_posts": 2863
+    },
+    {
+      "position": 94,
+      "window_id": 18544,
+      "window_start": "2020-10-09T00:00:00",
+      "phase": "stream",
+      "n_posts": 3217
+    },
+    {
+      "position": 95,
+      "window_id": 18545,
+      "window_start": "2020-10-10T00:00:00",
+      "phase": "stream",
+      "n_posts": 1087
+    },
+    {
+      "position": 96,
+      "window_id": 18546,
+      "window_start": "2020-10-11T00:00:00",
+      "phase": "stream",
+      "n_posts": 3245
+    },
+    {
+      "position": 97,
+      "window_id": 18547,
+      "window_start": "2020-10-12T00:00:00",
+      "phase": "stream",
+      "n_posts": 2420
+    },
+    {
+      "position": 98,
+      "window_id": 18548,
+      "window_start": "2020-10-13T00:00:00",
+      "phase": "stream",
+      "n_posts": 2492
+    },
+    {
+      "position": 99,
+      "window_id": 18549,
+      "window_start": "2020-10-14T00:00:00",
+      "phase": "stream",
+      "n_posts": 4345
+    },
+    {
+      "position": 100,
+      "window_id": 18550,
+      "window_start": "2020-10-15T00:00:00",
+      "phase": "stream",
+      "n_posts": 2481
+    },
+    {
+      "position": 101,
+      "window_id": 18551,
+      "window_start": "2020-10-16T00:00:00",
+      "phase": "stream",
+      "n_posts": 2715
+    },
+    {
+      "position": 102,
+      "window_id": 18552,
+      "window_start": "2020-10-17T00:00:00",
+      "phase": "stream",
+      "n_posts": 4413
+    },
+    {
+      "position": 103,
+      "window_id": 18553,
+      "window_start": "2020-10-18T00:00:00",
+      "phase": "stream",
+      "n_posts": 1317
+    },
+    {
+      "position": 104,
+      "window_id": 18554,
+      "window_start": "2020-10-19T00:00:00",
+      "phase": "stream",
+      "n_posts": 1980
+    },
+    {
+      "position": 105,
+      "window_id": 18555,
+      "window_start": "2020-10-20T00:00:00",
+      "phase": "stream",
+      "n_posts": 2877
+    },
+    {
+      "position": 106,
+      "window_id": 18743,
+      "window_start": "2021-04-26T00:00:00",
+      "phase": "stream",
+      "n_posts": 3318
+    },
+    {
+      "position": 107,
+      "window_id": 18744,
+      "window_start": "2021-04-27T00:00:00",
+      "phase": "stream",
+      "n_posts": 220
+    },
+    {
+      "position": 108,
+      "window_id": 18745,
+      "window_start": "2021-04-28T00:00:00",
+      "phase": "stream",
+      "n_posts": 3365
+    },
+    {
+      "position": 109,
+      "window_id": 18746,
+      "window_start": "2021-04-29T00:00:00",
+      "phase": "stream",
+      "n_posts": 593
+    },
+    {
+      "position": 110,
+      "window_id": 18747,
+      "window_start": "2021-04-30T00:00:00",
+      "phase": "stream",
+      "n_posts": 1540
+    },
+    {
+      "position": 111,
+      "window_id": 18748,
+      "window_start": "2021-05-01T00:00:00",
+      "phase": "stream",
+      "n_posts": 1903
+    },
+    {
+      "position": 112,
+      "window_id": 18750,
+      "window_start": "2021-05-03T00:00:00",
+      "phase": "stream",
+      "n_posts": 1864
+    },
+    {
+      "position": 113,
+      "window_id": 18751,
+      "window_start": "2021-05-04T00:00:00",
+      "phase": "stream",
+      "n_posts": 2755
+    },
+    {
+      "position": 114,
+      "window_id": 18752,
+      "window_start": "2021-05-05T00:00:00",
+      "phase": "stream",
+      "n_posts": 4886
+    },
+    {
+      "position": 115,
+      "window_id": 18754,
+      "window_start": "2021-05-07T00:00:00",
+      "phase": "stream",
+      "n_posts": 4586
+    },
+    {
+      "position": 116,
+      "window_id": 18755,
+      "window_start": "2021-05-08T00:00:00",
+      "phase": "stream",
+      "n_posts": 5031
+    },
+    {
+      "position": 117,
+      "window_id": 18756,
+      "window_start": "2021-05-09T00:00:00",
+      "phase": "stream",
+      "n_posts": 966
+    },
+    {
+      "position": 118,
+      "window_id": 18757,
+      "window_start": "2021-05-10T00:00:00",
+      "phase": "stream",
+      "n_posts": 803
+    },
+    {
+      "position": 119,
+      "window_id": 18758,
+      "window_start": "2021-05-11T00:00:00",
+      "phase": "stream",
+      "n_posts": 422
+    },
+    {
+      "position": 120,
+      "window_id": 18760,
+      "window_start": "2021-05-13T00:00:00",
+      "phase": "stream",
+      "n_posts": 1325
+    },
+    {
+      "position": 121,
+      "window_id": 18761,
+      "window_start": "2021-05-14T00:00:00",
+      "phase": "stream",
+      "n_posts": 4064
+    },
+    {
+      "position": 122,
+      "window_id": 18762,
+      "window_start": "2021-05-15T00:00:00",
+      "phase": "stream",
+      "n_posts": 832
+    },
+    {
+      "position": 123,
+      "window_id": 18763,
+      "window_start": "2021-05-16T00:00:00",
+      "phase": "stream",
+      "n_posts": 2136
+    },
+    {
+      "position": 124,
+      "window_id": 18765,
+      "window_start": "2021-05-18T00:00:00",
+      "phase": "stream",
+      "n_posts": 3759
+    },
+    {
+      "position": 125,
+      "window_id": 18766,
+      "window_start": "2021-05-19T00:00:00",
+      "phase": "stream",
+      "n_posts": 4516
+    },
+    {
+      "position": 126,
+      "window_id": 18767,
+      "window_start": "2021-05-20T00:00:00",
+      "phase": "stream",
+      "n_posts": 352
+    },
+    {
+      "position": 127,
+      "window_id": 18768,
+      "window_start": "2021-05-21T00:00:00",
+      "phase": "stream",
+      "n_posts": 3639
+    },
+    {
+      "position": 128,
+      "window_id": 18770,
+      "window_start": "2021-05-23T00:00:00",
+      "phase": "stream",
+      "n_posts": 3001
+    },
+    {
+      "position": 129,
+      "window_id": 18772,
+      "window_start": "2021-05-25T00:00:00",
+      "phase": "stream",
+      "n_posts": 7114
+    },
+    {
+      "position": 130,
+      "window_id": 18773,
+      "window_start": "2021-05-26T00:00:00",
+      "phase": "stream",
+      "n_posts": 4750
+    },
+    {
+      "position": 131,
+      "window_id": 18774,
+      "window_start": "2021-05-27T00:00:00",
+      "phase": "stream",
+      "n_posts": 2390
+    },
+    {
+      "position": 132,
+      "window_id": 18775,
+      "window_start": "2021-05-28T00:00:00",
+      "phase": "stream",
+      "n_posts": 3704
+    },
+    {
+      "position": 133,
+      "window_id": 18776,
+      "window_start": "2021-05-29T00:00:00",
+      "phase": "stream",
+      "n_posts": 2398
+    },
+    {
+      "position": 134,
+      "window_id": 18777,
+      "window_start": "2021-05-30T00:00:00",
+      "phase": "stream",
+      "n_posts": 4006
+    },
+    {
+      "position": 135,
+      "window_id": 18779,
+      "window_start": "2021-06-01T00:00:00",
+      "phase": "stream",
+      "n_posts": 5174
+    },
+    {
+      "position": 136,
+      "window_id": 18780,
+      "window_start": "2021-06-02T00:00:00",
+      "phase": "stream",
+      "n_posts": 3343
+    },
+    {
+      "position": 137,
+      "window_id": 18781,
+      "window_start": "2021-06-03T00:00:00",
+      "phase": "stream",
+      "n_posts": 7229
+    },
+    {
+      "position": 138,
+      "window_id": 18783,
+      "window_start": "2021-06-05T00:00:00",
+      "phase": "stream",
+      "n_posts": 4323
+    },
+    {
+      "position": 139,
+      "window_id": 18785,
+      "window_start": "2021-06-07T00:00:00",
+      "phase": "stream",
+      "n_posts": 3587
+    },
+    {
+      "position": 140,
+      "window_id": 18786,
+      "window_start": "2021-06-08T00:00:00",
+      "phase": "stream",
+      "n_posts": 2830
+    },
+    {
+      "position": 141,
+      "window_id": 18787,
+      "window_start": "2021-06-09T00:00:00",
+      "phase": "stream",
+      "n_posts": 5158
+    },
+    {
+      "position": 142,
+      "window_id": 18789,
+      "window_start": "2021-06-11T00:00:00",
+      "phase": "stream",
+      "n_posts": 4072
+    },
+    {
+      "position": 143,
+      "window_id": 18790,
+      "window_start": "2021-06-12T00:00:00",
+      "phase": "stream",
+      "n_posts": 1037
+    },
+    {
+      "position": 144,
+      "window_id": 18791,
+      "window_start": "2021-06-13T00:00:00",
+      "phase": "stream",
+      "n_posts": 3931
+    },
+    {
+      "position": 145,
+      "window_id": 18792,
+      "window_start": "2021-06-14T00:00:00",
+      "phase": "stream",
+      "n_posts": 4293
+    },
+    {
+      "position": 146,
+      "window_id": 18793,
+      "window_start": "2021-06-15T00:00:00",
+      "phase": "stream",
+      "n_posts": 2803
+    },
+    {
+      "position": 147,
+      "window_id": 18794,
+      "window_start": "2021-06-16T00:00:00",
+      "phase": "stream",
+      "n_posts": 3344
+    },
+    {
+      "position": 148,
+      "window_id": 18795,
+      "window_start": "2021-06-17T00:00:00",
+      "phase": "stream",
+      "n_posts": 2979
+    },
+    {
+      "position": 149,
+      "window_id": 18796,
+      "window_start": "2021-06-18T00:00:00",
+      "phase": "stream",
+      "n_posts": 2771
+    },
+    {
+      "position": 150,
+      "window_id": 18797,
+      "window_start": "2021-06-19T00:00:00",
+      "phase": "stream",
+      "n_posts": 2854
+    },
+    {
+      "position": 151,
+      "window_id": 18802,
+      "window_start": "2021-06-24T00:00:00",
+      "phase": "stream",
+      "n_posts": 4231
+    },
+    {
+      "position": 152,
+      "window_id": 18804,
+      "window_start": "2021-06-26T00:00:00",
+      "phase": "stream",
+      "n_posts": 1850
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+# Experiment scenarios - shared settings for experiments/scenarios.py.
+# Relative paths are resolved from the repository root (same convention as drift/ and spark/).
+
+source_windows: "windows_all.jsonl"    # real cleaned COVID tweet windows (drift/prepare_windows.py or Task 2)
+base_drift_config: "drift/config.yaml" # detector settings copied into every scenario config (paths overridden)
+scenarios_dir: "experiments/scenarios" # scenario.json + config.yaml (+ generated windows.jsonl) per scenario
+results_dir: "output/experiments"      # detector outputs per scenario (scores, saved models, embedding cache)
+seed: 42
+
+# Two "concepts" taken from the real data, one year apart (inclusive window_start dates).
+# Old = the first weeks of the dataset, which also contains the 14-window detector reference period.
+# New = the 2021 vaccine-era tweets, which the full run already scores ~2x the reference FDD.
+concepts:
+  old: {start: "2020-04-19", end: "2020-05-31"}
+  new: {start: "2021-04-26", end: "2021-06-26"}
+
+stream:
+  n_windows: 60          # windows per controlled scenario
+  reference_windows: 14  # must match drift/config.yaml driftlens.reference_windows
+  window_size: 1000      # tweets per window (= DriftLens window_sample_size)
+  change_point: 30       # 0-based window position where the controlled change starts
+  gradual_length: 15     # gradual: windows in the transition (share of new tweets rises linearly)
+  volume_factor: 3       # volume: tweets per window multiplied by this from change_point on
+  start_date: "2000-01-01"  # synthetic window_start of position 0 (window_id = days since epoch, as in Task 2)
