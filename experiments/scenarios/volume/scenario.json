@@ -2,7 +2,7 @@
   "scenario": "volume",
   "description": "Old concept throughout. From the change point on each window has volume_factor times more tweets. The concept does not change.",
   "windows_path": "experiments/scenarios/volume/windows.jsonl",
-  "windows_sha256": "62623fe215b2d1f3b7c9b45b41d5249ee4aba848467c88d731e74d1d2d600c66",
+  "windows_sha256": "5ca6f5b33f31fdfcf1f055f19dc5b4e75a4190520ec54a657b2f9027fff107e8",
   "source_windows": "windows_all.jsonl",
   "concepts": {
     "old": {
@@ -15,8 +15,8 @@
     }
   },
   "pool_sizes": {
-    "old": 124426,
-    "new": 137512
+    "old": 124366,
+    "new": 137394
   },
   "tweets_used": {
     "old": 120000,
@@ -837,6 +837,7 @@
       "n_new": 0,
       "frac_new": 0.0,
       "source_window_ids": [
+        18371,
         18374,
         18375,
         18376,
@@ -1225,6 +1226,7 @@
         18398,
         18399,
         18400,
+        18401,
         18402,
         18404,
         18405,
@@ -1974,7 +1976,6 @@
       "source_window_ids": [
         18371,
         18374,
-        18375,
         18376,
         18377,
         18378,

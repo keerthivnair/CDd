@@ -82,6 +82,11 @@ def get_detector(cfg: dict, embedder, windows: list, refit: bool) -> tuple:
     return dl, set(ref_ids)
 
 
+MCDDD_KEYS = ["hidden_dim", "output_dim", "n_encoders", "lr", "lambda_gp", "lipschitz_k", "eps_small", "eps_big",
+              "n_sub_windows", "sample_set_size", "k_pairs", "train_epochs", "scoring_sample_size",
+              "context_windows", "n_calibration", "percentile", "online_training", "holdout_fraction", "seed"]
+
+
 def get_mcddd(cfg: dict, embedder, windows: list, ref_ids: set, refit: bool) -> MCDDD:
     """Build or load the MCD-DD detector, trained on the same reference embeddings as DriftLens."""
     m = cfg.get("mcddd", {})
@@ -89,43 +94,42 @@ def get_mcddd(cfg: dict, embedder, windows: list, ref_ids: set, refit: bool) -> 
         return None
 
     mcddd_path = resolve(m.get("model_path", "output/drift/mcddd.pt"))
-    e = cfg["embedding"]
-    input_dim = 384  # all-MiniLM-L6-v2 dimension
+    params = {k: m[k] for k in MCDDD_KEYS if k in m}  # keys missing from the config use MCDDD defaults
+    device = m.get("device", cfg["embedding"].get("device", ""))
+    ref_list = sorted(ref_ids)
 
     if os.path.exists(mcddd_path) and not refit:
         try:
-            mcddd = MCDDD.load(mcddd_path)
-            log.info("Loaded MCD-DD model from %s", mcddd_path)
-            return mcddd
+            mcddd = MCDDD.load(mcddd_path, device=device)
+            saved = mcddd.params()
+            same = (all(saved[k] == v for k, v in params.items())
+                    and list(mcddd.meta.get("reference_ids", [])) == ref_list
+                    and mcddd.meta.get("model") == cfg["embedding"]["model"])
+            if same:
+                log.info("Loaded MCD-DD model from %s", mcddd_path)
+                return mcddd
+            log.info("Saved MCD-DD model does not match the config; refitting")
         except Exception as ex:
             log.warning("Failed to load MCD-DD from %s (%s); refitting", mcddd_path, ex)
 
-    # Build reference embeddings — reuse the exact same cached embeddings as DriftLens
+    # Reuse the exact same cached embeddings as DriftLens; each reference window is one sub-window
     ref_windows = [w for w in windows if w["window_id"] in ref_ids]
     log.info("Fitting MCD-DD on %s reference windows (same embeddings as DriftLens)", len(ref_windows))
     ref_parts = [embedder.embed_window(w) for w in ref_windows]
-    ref_emb = np.vstack(ref_parts)
-
-    mcddd = MCDDD(
-        input_dim=input_dim,
-        hidden_dim=m.get("hidden_dim", 128),
-        output_dim=m.get("output_dim", 64),
-        lr=m.get("lr", 1e-3),
-        lambda_gp=m.get("lambda_gp", 0.1),
-        lipschitz_k=m.get("lipschitz_k", 1.0),
-        eps_small=m.get("eps_small", 0.01),
-        eps_big=m.get("eps_big", 0.1),
-        n_sub_windows=m.get("n_sub_windows", 5),
-        sample_set_size=m.get("sample_set_size", 100),
-        k_pairs=m.get("k_pairs", 5),
-        train_epochs=m.get("train_epochs", 3),
-        seed=m.get("seed", 42),
-    ).fit(ref_emb)
+    groups = np.concatenate([np.full(len(e), w["window_id"]) for e, w in zip(ref_parts, ref_windows)])
+    t0 = time.perf_counter()
+    mcddd = MCDDD(input_dim=ref_parts[0].shape[1], device=device, **params).fit(np.vstack(ref_parts), groups)
+    log.info("MCD-DD trained + calibrated in %.1fs", time.perf_counter() - t0)
 
     os.makedirs(os.path.dirname(mcddd_path), exist_ok=True)
-    mcddd.save(mcddd_path)
+    mcddd.save(mcddd_path, reference_ids=ref_list, model=cfg["embedding"]["model"])
     log.info("MCD-DD fitted and saved to %s", mcddd_path)
     return mcddd
+
+
+def sig(x, digits: int = 6):
+    """Round to significant digits (fixed decimals would flatten very small scores to 0)."""
+    return None if x is None else float(f"{x:.{digits}g}")
 
 
 def score_window(dl: DriftLens, mcddd: MCDDD | None, embedder, window: dict, ref_ids: set) -> dict:
@@ -137,11 +141,12 @@ def score_window(dl: DriftLens, mcddd: MCDDD | None, embedder, window: dict, ref
     # DriftLens score
     r = dl.score(emb, window_id=window["window_id"])
 
-    # MCD-DD score (uses same embeddings, no re-embedding)
-    if mcddd is not None:
-        mr = mcddd.score(emb)
+    # MCD-DD score (same embeddings). Reference windows are its training data, so they are not scored;
+    # fit() already placed their held-out rows in MCD-DD's sliding context.
+    if mcddd is not None and window["window_id"] not in ref_ids:
+        mr = mcddd.score(emb, window_id=window["window_id"])
     else:
-        mr = {"mcddd_score": None, "mcddd_alarm": None, "mcddd_threshold": None}
+        mr = {"mcddd_score": None, "mcddd_alarm": None, "mcddd_threshold": None, "mcddd_lag": None}
 
     latency_ms = (time.perf_counter() - t0) * 1000.0
     n_posts = window.get("post_count", len(window.get("texts", [])))
@@ -155,9 +160,10 @@ def score_window(dl: DriftLens, mcddd: MCDDD | None, embedder, window: dict, ref
         "driftlens_alarm": r["driftlens_alarm"],
         "threshold": round(r["threshold"], 6),
         # MCD-DD outputs
-        "mcddd_score": round(mr["mcddd_score"], 6) if mr["mcddd_score"] is not None else None,
+        "mcddd_score": sig(mr["mcddd_score"]),
         "mcddd_alarm": mr["mcddd_alarm"],
-        "mcddd_threshold": round(mr["mcddd_threshold"], 6) if mr.get("mcddd_threshold") is not None else None,
+        "mcddd_threshold": sig(mr.get("mcddd_threshold")),
+        "mcddd_lag": mr.get("mcddd_lag"),
         # Metadata
         "n_posts": n_posts,
         "n_used": r["n_used"],
@@ -172,8 +178,7 @@ def log_result(res: dict) -> None:
     mcd_part = ""
     if res.get("mcddd_score") is not None:
         val = res["mcddd_score"]
-        fmt_val = f"{val:.2e}" if (0 < val < 0.001) else f"{val:.4f}"
-        mcd_part = f" mcddd={fmt_val} mcddd_alarm={res['mcddd_alarm']}"
+        mcd_part = f" mcddd={val:.4g} mcddd_thr={res['mcddd_threshold']:.4g} mcddd_alarm={res['mcddd_alarm']}"
     log.info("window=%s driftlens=%.4f threshold=%.4f dl_alarm=%s%s n=%s latency=%.1fms throughput=%.1fp/s%s",
              res["window_id"], res["driftlens_score"], res["threshold"], res["driftlens_alarm"],
              mcd_part,

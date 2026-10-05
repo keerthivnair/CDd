@@ -58,6 +58,7 @@ This follows the usual way of building drift benchmarks from real data: inject a
 | `config.yaml` | Concept periods, stream length, window size, change point, seed | yes |
 | `scenarios.py` | Builds all five scenarios | yes |
 | `evaluate.py` | Scores detector alarms against ground truth → `results/summary.{json,md}` | yes |
+| `mcddd_seeds.py` | Refits only MCD-DD for several model seeds on the cached embeddings → `results/mcddd_seeds<tag>.{json,md}` | yes |
 | `tests/test_scenarios.py` | 13 tests on synthetic windows: composition, no reuse, reproducibility, ground truth | yes |
 | `scenarios/index.json` | One-line summary of every scenario and its change point | yes |
 | `scenarios/<name>/scenario.json` | **Ground truth**, plus per-window composition (`n_old`, `n_new`, `frac_new`, `phase`, source window ids) and the windows file's sha256 | yes |
@@ -97,7 +98,7 @@ python experiments/evaluate.py
 pytest experiments/tests/ -v
 ```
 
-Bash loop to run all five, about 30 minutes on a laptop GPU (each controlled scenario embeds 60k–120k tweets; `natural` reuses the main embedding cache but is slowed by threshold calibration, see Results):
+Bash loop to run all five: about 6 minutes on an RTX 5060 laptop GPU, ~30 minutes on CPU (each controlled scenario embeds 60k–120k tweets; `natural` reuses the main embedding cache but is slowed by DriftLens threshold calibration, see Results):
 
 ```bash
 for s in natural sudden gradual volume no_drift; do python drift/run_drift.py --config experiments/scenarios/$s/config.yaml --refit; done
@@ -123,23 +124,46 @@ Only windows after the 14 reference windows count.
 
 ## Results
 
-Both detectors ran unchanged with the default `drift/config.yaml` settings (2026-10-03, RTX 3050 laptop GPU). The full table is in [`results/summary.md`](results/summary.md) and the per-window numbers are in `results/summary.json`.
+Both detectors run with the default `drift/config.yaml` settings (2026-10-05, RTX 5060 laptop GPU, torch 2.11+cu128). The full table is in [`results/summary.md`](results/summary.md), per-window numbers in `results/summary.json`, and MCD-DD across 5 model seeds in [`results/mcddd_seeds_trained.md`](results/mcddd_seeds_trained.md) / [`results/mcddd_seeds_untrained.md`](results/mcddd_seeds_untrained.md).
 
-| Scenario | Expected | DriftLens | MCD-DD |
-|---|---|---|---|
-| natural | unknown | 122/139 alarms (matches the main Task 3 run) | 2/139 alarms |
-| sudden | drift at 30 | **0 false alarms; fires at 30 (delay 0)**; 100% of windows after the change | no alarms |
-| gradual | drift 30→45 | **0 false alarms; fires at 32** (19% new tweets, delay 2); 93% of windows after the change | no alarms |
-| volume | no drift | **0 alarms** (×3 volume ignored) | 0 alarms |
-| no_drift | no drift | **0 alarms** | 0 alarms |
+> **Dataset note.** The local `windows_all.jsonl` now has 154 windows / 411,879 tweets (one more day, 2021-06-27, than the 153 used on 2026-10-03), and the concept pools differ by ~100 tweets. `scenarios.py` was rerun, so every `scenario.json` hash and window composition matches the data actually scored. Change points are unchanged.
+
+| Scenario | Expected | DriftLens | MCD-DD (seed 42, the run in `summary.md`) | MCD-DD over 5 seeds |
+|---|---|---|---|---|
+| natural | unknown | 120/140 alarms | 12/140 alarms | - |
+| sudden | drift at 30 | **0 false alarms; fires at 30 (+0)**; 100% after | 0 false alarms; fires at 31 (+1); alarms 31-39 | **5/5 detected, delay 0-2** |
+| gradual | drift 30→45 | **0 false alarms; fires at 31 (+1)**; 97% after | 0 false alarms; fires at 44 (+14) | **4/5 detected, delay 6-14** |
+| volume | no drift | 1/46 (false) | **0/46** | 0 in every seed |
+| no_drift | no drift | **0/46** | **0/46** | 0-1 per seed |
 
 What the scenarios show:
 
-- **They behave as designed.** The streams with no injected change (`no_drift` and `volume`) give zero alarms from both detectors. The sudden change shows up as a clean step in DriftLens's score, from about 0.022 to 0.050 against a threshold of 0.023. In the gradual scenario the score climbs steadily with the share of new tweets (0.021 at 30, 0.036 at 39, 0.046 at 45). So the controlled change, and nothing else, is what moves the detectors.
-- **The volume case isolates volume.** DriftLens samples 1000 tweets from every window, so tripling the volume leaves its score flat: 0.0221 before, 0.0222 after.
-- **MCD-DD sees the sudden change but does not alarm.** At window 30 its score is 8.3e-5, about 21× the pre-change median (4e-6) and 6× the pre-change maximum. Its dynamic threshold at that window is 1.7e-4, so no alarm fires. The threshold also grows during online training, from about 1.7e-4 at window 30 to about 6e-3 by the end. This is a finding for whoever tunes MCD-DD; the scenarios themselves are fine. The `gradual` case is harder for MCD-DD by design, because neighbouring windows differ by only ~6%.
+- **They behave as designed.** The streams with no injected change (`no_drift`, `volume`) give no or single borderline alarms from both detectors. DriftLens's score steps from ~0.022 to ~0.050 at the sudden change (threshold 0.023) and climbs with the share of new tweets in the gradual case. The volume case isolates volume, because both detectors subsample every window to 1000 tweets.
+- **MCD-DD now detects drift.** It fires at the sudden change and alarms for the ~10 windows during which the change sits inside its sliding context, then goes quiet once the context is all new-concept. That is the expected pattern for a "did something change recently?" detector, while DriftLens keeps alarming because it compares against the fixed 2020 baseline.
+- **Gradual drift is MCD-DD's weak spot.** The paper reports the same weakness for incremental drift. MCD-DD compares the newest window with the previous 10, so a 6.7%-per-window change only becomes visible once 40-90% of the context differs. Depending on the encoder's random start, that happens 6-14 windows into the transition, and 1 of 5 seeds misses it.
+- **MCD-DD varies with the model seed, so read the seed table.** The 14 reference windows are i.i.d. samples of one concept, so the paper's contrastive training signal ("temporally distant days are different concepts") has no real concept change to learn from. Training mostly teaches the encoder to ignore or spot the injected noise. An **untrained** ensemble (`train_epochs: 0`) did better on both the validation streams and these scenarios (sudden 5/5 at +0, gradual 5/5 at +4-6, ~1-2% false alarms), but it skips the paper's learning step. The trained variant stays the default for fidelity to the paper. Switch with `train_epochs` in `drift/config.yaml`.
 
-### Why MCD-DD gives 0 alarms
+### How MCD-DD was fixed (2026-10-05)
+
+Details and the full list are in [`drift/README.md`](../drift/README.md#mcd-dd--can-a-neural-network-tell-windows-apart). In short:
+
+1. **GPU.** The installed torch 2.6+cu124 has no kernels for the RTX 5060 (sm_120), so everything fell back to the CPU without saying so. With torch 2.11+cu128, MCD-DD trains and calibrates in ~1.5 s and a controlled scenario runs in ~20 s instead of 2-4 min.
+2. **Training bug.** The pair RNG was reseeded on every step, so every "epoch" trained on the same batch. Pairs are now fresh on every step and are sampled on the GPU.
+3. **Threshold.** It is bootstrapped at the scoring set size with the exact scoring statistic, on **held-out** reference tweets (80/20 split per reference day), and frozen. It used to be calibrated on 100-tweet sets and reset on every window. The encoder memorises its training tweets, so calibrating on them gave alarms on every window next to the reference.
+4. **Detection statistic.** MCD is now the L2 distance (paper Eq. 7) on standardised inputs, maxed over a sliding context of the previous 10 windows (as in the paper's Fig. 3 heatmaps). It used to be the squared distance to the previous window only, which can't see gradual drift.
+5. **Robustness.** An ensemble of 5 independently trained encoders, plus `experiments/mcddd_seeds.py` to report results over model seeds.
+6. **Hyper-parameters** (`eps_small` 0.03 / `eps_big` 0.3, λ_GP = 1, 100 steps, context 10, hold-out 0.8) were chosen on **separate validation streams**: the same concept pools with different seeds, change point 25 and gradual length 12, never these scenarios. With the paper-scale noise (`eps_big` ≥ 1), the encoder lost most of its sensitivity to topic change.
+
+Also fixed along the way: the embedding cache was keyed only by `window_id` and row count, so regenerated scenarios (same synthetic ids, different tweets) could silently reuse stale embeddings. A text hash is now stored next to each `.npy`. Old caches are re-embedded once.
+
+To check MCD-DD's spread across seeds after a change:
+
+```bash
+python experiments/mcddd_seeds.py --seeds 42 1 2 3 4 --tag _trained
+python experiments/mcddd_seeds.py --seeds 42 1 2 3 4 --params '{"train_epochs": 0}' --tag _untrained
+```
+
+### Why the original MCD-DD gave 0 alarms (2026-10-03, before the fix)
 
 The runs themselves are valid. In every scenario MCD-DD is trained from scratch (`--refit`) on the 14 reference windows and scores every window with non-zero scores, and its 10 unit tests pass. Replaying the `sudden` run separately reproduces the same numbers. The zeros come from how `drift/mcddd.py` sets its alarm threshold:
 
@@ -155,11 +179,16 @@ The runs themselves are valid. In every scenario MCD-DD is trained from scratch 
 2. **The threshold inflates during the stream.** `score()` takes a training step on every incoming window. Each step pushes all encoder distances further apart, so the threshold grows from 1.4e-4 to 6.2e-3 (about 40×) while real changes stay around 1e-4.
 3. **The encoder is barely trained.** It gets 3 steps at fit and 1 per window after that, and the "strong negative" pairs add Gaussian noise with σ = 0.1 to 384-d unit vectors (noise norm ≈ 2, larger than the vector itself). So the encoder mostly learns to spot added noise rather than topic change. Even at the 100-tweet scale, the change at window 30 (median cross-window distance 1.0e-4) stays inside the same-window noise.
 
-Possible fixes for the MCD-DD owner, none applied here:
+Fixes suggested at the time (all applied since, see above):
 - Calibrate the threshold at the same set size used for scoring, or score 100-tweet sample sets, as the threshold does.
 - Freeze or normalise the threshold after the offline fit instead of updating it every window.
 - Train for more steps, and reconsider `eps_big`.
 
-Rerun the five scenario configs after any change to compare.
+Runtime on the RTX 5060: each controlled scenario takes ~20 s and `natural` ~4 min (DriftLens calibrates a new threshold on the CPU for every distinct window size under 1000).
 
-Runtime: each controlled scenario takes about 2–4 minutes. `natural` takes about 18 minutes, because DriftLens calibrates a new threshold (about 30 s) for every distinct window size under 1000.
+### Known limitations / not done
+
+- DriftLens is CPU-only (numpy/scipy `sqrtm`). It is the slow part of `natural` and could be batched on the GPU (`eigvalsh` of √S₁·S₂·√S₁).
+- MCD-DD's online training (`online_training: true`) is implemented but was not evaluated here. It is off by default because updating the encoder on every window inflated the threshold in the original version.
+- The validation streams reuse the same two concept pools as the test scenarios (only the sampling differs), so they guard against tuning to one particular draw, not against a different kind of drift.
+- MCD-DD's false-alarm rate is calibrated per window (p99). Because a window stays in the context for 10 windows, one unusual window can cause a short burst of alarms.

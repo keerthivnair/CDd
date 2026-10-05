@@ -17,17 +17,25 @@ driftlens:
   seed: 42
 mcddd:
   enabled: true
+  device: ''
   hidden_dim: 128
   output_dim: 64
+  n_encoders: 5
   lr: 0.001
-  lambda_gp: 0.1
+  lambda_gp: 1.0
   lipschitz_k: 1.0
-  eps_small: 0.01
-  eps_big: 0.1
+  eps_small: 0.03
+  eps_big: 0.3
   n_sub_windows: 5
   sample_set_size: 100
-  k_pairs: 5
-  train_epochs: 3
+  k_pairs: 10
+  train_epochs: 100
+  scoring_sample_size: 1000
+  context_windows: 10
+  holdout_fraction: 0.8
+  n_calibration: 500
+  percentile: 99.0
+  online_training: false
   seed: 42
   model_path: output/experiments/no_drift/mcddd.pt
 output:

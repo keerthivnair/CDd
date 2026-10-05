@@ -1,0 +1,312 @@
+{
+  "seeds": [
+    42,
+    1,
+    2,
+    3,
+    4
+  ],
+  "overrides": {
+    "train_epochs": 100
+  },
+  "scenarios": {
+    "sudden": [
+      {
+        "seed": 42,
+        "alarms": 9,
+        "stream_windows": 46,
+        "alarm_rate": 0.1957,
+        "alarm_positions": [
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "false_alarms_before_drift": 0,
+        "false_alarm_rate_before_drift": 0.0,
+        "first_alarm_after_drift": 31,
+        "detection_delay": 1,
+        "detected_within_tolerance": true,
+        "alarm_rate_after_drift": 0.3
+      },
+      {
+        "seed": 1,
+        "alarms": 7,
+        "stream_windows": 46,
+        "alarm_rate": 0.1522,
+        "alarm_positions": [
+          20,
+          32,
+          33,
+          34,
+          36,
+          37,
+          39
+        ],
+        "false_alarms_before_drift": 1,
+        "false_alarm_rate_before_drift": 0.0625,
+        "first_alarm_after_drift": 32,
+        "detection_delay": 2,
+        "detected_within_tolerance": true,
+        "alarm_rate_after_drift": 0.2
+      },
+      {
+        "seed": 2,
+        "alarms": 10,
+        "stream_windows": 46,
+        "alarm_rate": 0.2174,
+        "alarm_positions": [
+          30,
+          31,
+          32,
+          33,
+          35,
+          36,
+          37,
+          38,
+          39,
+          44
+        ],
+        "false_alarms_before_drift": 0,
+        "false_alarm_rate_before_drift": 0.0,
+        "first_alarm_after_drift": 30,
+        "detection_delay": 0,
+        "detected_within_tolerance": true,
+        "alarm_rate_after_drift": 0.3333
+      },
+      {
+        "seed": 3,
+        "alarms": 1,
+        "stream_windows": 46,
+        "alarm_rate": 0.0217,
+        "alarm_positions": [
+          31
+        ],
+        "false_alarms_before_drift": 0,
+        "false_alarm_rate_before_drift": 0.0,
+        "first_alarm_after_drift": 31,
+        "detection_delay": 1,
+        "detected_within_tolerance": true,
+        "alarm_rate_after_drift": 0.0333
+      },
+      {
+        "seed": 4,
+        "alarms": 10,
+        "stream_windows": 46,
+        "alarm_rate": 0.2174,
+        "alarm_positions": [
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39
+        ],
+        "false_alarms_before_drift": 0,
+        "false_alarm_rate_before_drift": 0.0,
+        "first_alarm_after_drift": 30,
+        "detection_delay": 0,
+        "detected_within_tolerance": true,
+        "alarm_rate_after_drift": 0.3333
+      }
+    ],
+    "gradual": [
+      {
+        "seed": 42,
+        "alarms": 1,
+        "stream_windows": 46,
+        "alarm_rate": 0.0217,
+        "alarm_positions": [
+          44
+        ],
+        "false_alarms_before_drift": 0,
+        "false_alarm_rate_before_drift": 0.0,
+        "first_alarm_after_drift": 44,
+        "detection_delay": 14,
+        "detected_within_tolerance": true,
+        "alarm_rate_after_drift": 0.0333
+      },
+      {
+        "seed": 1,
+        "alarms": 8,
+        "stream_windows": 46,
+        "alarm_rate": 0.1739,
+        "alarm_positions": [
+          14,
+          16,
+          22,
+          38,
+          48,
+          49,
+          53,
+          57
+        ],
+        "false_alarms_before_drift": 3,
+        "false_alarm_rate_before_drift": 0.1875,
+        "first_alarm_after_drift": 38,
+        "detection_delay": 8,
+        "detected_within_tolerance": true,
+        "alarm_rate_after_drift": 0.1667
+      },
+      {
+        "seed": 2,
+        "alarms": 6,
+        "stream_windows": 46,
+        "alarm_rate": 0.1304,
+        "alarm_positions": [
+          40,
+          41,
+          43,
+          44,
+          45,
+          46
+        ],
+        "false_alarms_before_drift": 0,
+        "false_alarm_rate_before_drift": 0.0,
+        "first_alarm_after_drift": 40,
+        "detection_delay": 10,
+        "detected_within_tolerance": true,
+        "alarm_rate_after_drift": 0.2
+      },
+      {
+        "seed": 3,
+        "alarms": 3,
+        "stream_windows": 46,
+        "alarm_rate": 0.0652,
+        "alarm_positions": [
+          14,
+          22,
+          36
+        ],
+        "false_alarms_before_drift": 2,
+        "false_alarm_rate_before_drift": 0.125,
+        "first_alarm_after_drift": 36,
+        "detection_delay": 6,
+        "detected_within_tolerance": true,
+        "alarm_rate_after_drift": 0.0333
+      },
+      {
+        "seed": 4,
+        "alarms": 1,
+        "stream_windows": 46,
+        "alarm_rate": 0.0217,
+        "alarm_positions": [
+          19
+        ],
+        "false_alarms_before_drift": 1,
+        "false_alarm_rate_before_drift": 0.0625,
+        "first_alarm_after_drift": null,
+        "detection_delay": null,
+        "detected_within_tolerance": false,
+        "alarm_rate_after_drift": 0.0
+      }
+    ],
+    "volume": [
+      {
+        "seed": 42,
+        "alarms": 0,
+        "stream_windows": 46,
+        "alarm_rate": 0.0,
+        "alarm_positions": [],
+        "false_alarm_rate_before_volume_change": 0.0,
+        "false_alarm_rate_after_volume_change": 0.0,
+        "alarm_at_volume_change": false
+      },
+      {
+        "seed": 1,
+        "alarms": 0,
+        "stream_windows": 46,
+        "alarm_rate": 0.0,
+        "alarm_positions": [],
+        "false_alarm_rate_before_volume_change": 0.0,
+        "false_alarm_rate_after_volume_change": 0.0,
+        "alarm_at_volume_change": false
+      },
+      {
+        "seed": 2,
+        "alarms": 0,
+        "stream_windows": 46,
+        "alarm_rate": 0.0,
+        "alarm_positions": [],
+        "false_alarm_rate_before_volume_change": 0.0,
+        "false_alarm_rate_after_volume_change": 0.0,
+        "alarm_at_volume_change": false
+      },
+      {
+        "seed": 3,
+        "alarms": 0,
+        "stream_windows": 46,
+        "alarm_rate": 0.0,
+        "alarm_positions": [],
+        "false_alarm_rate_before_volume_change": 0.0,
+        "false_alarm_rate_after_volume_change": 0.0,
+        "alarm_at_volume_change": false
+      },
+      {
+        "seed": 4,
+        "alarms": 0,
+        "stream_windows": 46,
+        "alarm_rate": 0.0,
+        "alarm_positions": [],
+        "false_alarm_rate_before_volume_change": 0.0,
+        "false_alarm_rate_after_volume_change": 0.0,
+        "alarm_at_volume_change": false
+      }
+    ],
+    "no_drift": [
+      {
+        "seed": 42,
+        "alarms": 0,
+        "stream_windows": 46,
+        "alarm_rate": 0.0,
+        "alarm_positions": [],
+        "false_alarm_rate": 0.0
+      },
+      {
+        "seed": 1,
+        "alarms": 0,
+        "stream_windows": 46,
+        "alarm_rate": 0.0,
+        "alarm_positions": [],
+        "false_alarm_rate": 0.0
+      },
+      {
+        "seed": 2,
+        "alarms": 0,
+        "stream_windows": 46,
+        "alarm_rate": 0.0,
+        "alarm_positions": [],
+        "false_alarm_rate": 0.0
+      },
+      {
+        "seed": 3,
+        "alarms": 1,
+        "stream_windows": 46,
+        "alarm_rate": 0.0217,
+        "alarm_positions": [
+          15
+        ],
+        "false_alarm_rate": 0.0217
+      },
+      {
+        "seed": 4,
+        "alarms": 1,
+        "stream_windows": 46,
+        "alarm_rate": 0.0217,
+        "alarm_positions": [
+          59
+        ],
+        "false_alarm_rate": 0.0217
+      }
+    ]
+  }
+}

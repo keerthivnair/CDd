@@ -75,7 +75,7 @@ FDD = ‖μ_b − μ_w‖² + Tr(Σ_b + Σ_w − 2·√(Σ_b · Σ_w))
 
 ### MCD-DD — "can a neural network tell windows apart?"
 
-MCD-DD takes a learning-based approach: it trains a small neural network to recognise *concepts* (what a set of samples "looks like"), and detects drift when consecutive windows look too different to the network.
+MCD-DD ([Wan et al., KDD 2024](https://arxiv.org/abs/2407.05375)) takes a learning-based approach: it trains a small neural network to recognise *concepts* (what a set of samples "looks like"), and detects drift when the newest window looks too different from the recent windows before it.
 
 **The encoder (Deep Sets architecture):**
 
@@ -89,35 +89,49 @@ The network takes a *set* of embeddings (not a single one) and outputs a single 
                           MLP → concept vector (64-d)
 ```
 
+`n_encoders` (default 5) such encoders are initialised and trained independently, and the concept vector is their concatenation (÷√5). A single encoder's results depended heavily on its random start, and the ensemble averages that out.
+
 Because of mean-pooling, the output is the same regardless of the order of inputs — a useful property for sets.
 
-**Training (contrastive learning):**
+**Training (contrastive learning, offline on the reference period):**
 
-The encoder is trained to make the concept vectors of *similar* sets close together and *different* sets far apart. For each sub-window of a training window, it creates three kinds of pairs:
+Inputs are first standardised with the reference mean/std. Each reference window (one day) is a *sub-window*; 20% of its tweets train the encoder and 80% are **held out**. The encoder is trained to make the concept vectors of *similar* sets close together and *different* sets far apart. For each sub-window it draws `k_pairs` fresh pairs per step (100 steps):
 
 | Pair type | What is compared | Expected distance |
 |---|---|---|
-| **Positive** | Two random samples from the same sub-window | Small (same concept) |
-| **Weak negative** | Same sub-window, but small noise added to one | Medium |
-| **Strong negative** | Different sub-windows + large noise | Large (different concepts) |
+| **Positive** | Two random 100-tweet samples from the same day | Small (same concept) |
+| **Weak negative** | Same day, small Gaussian noise (`eps_small`) added to one | Medium |
+| **Strong negative** | A temporally distant day + larger noise (`eps_big`) | Large (different concepts) |
 
-The loss function (InfoNCE) pushes the encoder to:
-- minimise distance for positive pairs
-- maximise distance for negative pairs
-
-A **gradient penalty** (Lipschitz constraint) keeps the distances bounded so they don't explode.
+The InfoNCE loss pulls positives together and pushes negatives apart. A **gradient penalty** (paper's λ = 1) keeps the encoder L-Lipschitz so distances stay bounded.
 
 **Drift detection — Maximum Concept Discrepancy (MCD):**
 
 ```
-MCD = ‖h(prev_window) − h(curr_window)‖²
+MCD_t = max over the previous C windows j of ‖h(window_t) − h(window_j)‖₂      (C = context_windows = 10)
 ```
 
-Where `h(·)` is the encoder's concept vector for a window. If this squared distance exceeds the threshold → drift.
+`h(·)` is the encoder's concept vector of a random ≤1000-tweet sample of the window (same size as DriftLens, so traffic volume does not change the noise level). Comparing against the whole sliding context — as in the paper's Fig. 3 heatmaps — is what lets *gradual* drift build up into a detectable gap; comparing only with the previous day cannot see a change of a few percent per day.
 
-The threshold updates dynamically: it's the 95th percentile of the positive-pair distances seen during training. As the encoder improves, the threshold tightens.
+**Threshold (frozen after fit):** bootstrap on the held-out reference tweets — draw C+1 in-distribution sets of the scoring size, compute the same max-MCD statistic, repeat 500×, take the 99th percentile. It is recomputed (and cached) for smaller windows or a shorter context, the way DriftLens recalibrates per window size.
 
-**In short:** MCD-DD learns what a "concept" looks like and flags when consecutive windows disagree too much.
+**In short:** MCD-DD learns what a "concept" looks like and flags when today disagrees too much with any of the last 10 days.
+
+**Why these choices (validated on separate streams, not the official scenarios):**
+
+| Problem found | Effect | Fix |
+|---|---|---|
+| Pair RNG was reseeded on every step | All "epochs" trained on one identical batch | One persistent generator; fresh pairs each step |
+| Threshold calibrated on 100-tweet sets, score on whole windows; threshold re-set every window | Threshold ≈ 40× too high by the end of a stream, 0 alarms | Calibrate at the scoring set size with the scoring statistic; freeze it |
+| Calibration/context used the encoder's own training tweets | Encoder memorises them → every window next to the reference alarmed | 80/20 hold-out per reference window (enough held-out tweets for 11 disjoint 1000-tweet calibration sets) |
+| `eps_big` = 1.0 (paper-style large noise) | Encoder learns "spot the noise", sensitivity to topic change drops sharply | `eps_small` 0.03, `eps_big` 0.3 (paper's 1:10 ratio) |
+| Raw MiniLM dims have std ≈ 0.05 | MCD values ~1e-6, rounded to 0 in the output | Standardise inputs; L2 (not squared) distance, as in the paper |
+| One encoder per run | Results swung with the random start (gradual detected in 2/5 seeds) | Ensemble of 5 independently trained encoders |
+| torch 2.6+cu124 lacks kernels for RTX 50xx (sm_120) | Silent CPU fallback | Install a cu128 build (see below); device picked by actually running a kernel |
+
+**Trained vs. untrained encoder.** On this data the reference days are one stationary concept, so contrastive training has no real concept change to learn from. An untrained ensemble (`train_epochs: 0`) detected drift better in our experiments (see `experiments/README.md`). The trained variant is the default because it follows the paper.
+
+Deviations from the paper: the encoder is trained offline on the reference only (`online_training: false`; online updates are supported but inflated the threshold in earlier runs), and the threshold is bootstrapped on held-out reference data rather than from the latest positive pairs.
 
 ---
 
@@ -126,14 +140,14 @@ The threshold updates dynamically: it's the 95th percentile of the positive-pair
 | | DriftLens | MCD-DD |
 |---|---|---|
 | **Approach** | Statistical (Gaussian fit + Fréchet distance) | Neural (learned set encoder + concept distance) |
-| **Compares against** | Fixed reference baseline (the first 14 windows) | Previous window (sliding) |
-| **Drift meaning** | "This window is far from the starting point" | "This window is different from the last one" |
-| **Threshold** | Fixed at calibration (p99 of reference FDDs) | Dynamic (updates every window) |
-| **Detects** | Gradual + sudden drift from origin | Window-to-window change points |
+| **Compares against** | Fixed reference baseline (the first 14 windows) | Sliding context of the previous 10 windows |
+| **Drift meaning** | "This window is far from the starting point" | "This window differs from some recent window" |
+| **Threshold** | Fixed at calibration (p99 of reference FDDs) | Fixed at calibration (p99 of bootstrapped max-MCD) |
+| **Detects** | Gradual + sudden drift from origin | Change points; alarms stop ~10 windows after a drift once the context has adapted |
 | **Dependencies** | numpy, scipy, sklearn (lightweight) | PyTorch (heavier) |
 | **Interpretability** | High — mean shift vs shape change | Lower — learned representation |
 
-**They complement each other:** DriftLens catches long-term drift from the reference, MCD-DD catches sudden shifts between consecutive days.
+**They complement each other:** DriftLens says "we are far from where we started" (and keeps alarming), MCD-DD says "something changed in the last ~10 days" (and goes quiet once the new concept is the norm).
 
 ---
 
@@ -149,7 +163,7 @@ The threshold updates dynamically: it's the 95th percentile of the positive-pair
 | `config.yaml` | All settings (embedding model, DriftLens params, MCD-DD params) |
 | `requirements.txt` | Python dependencies |
 | `tests/test_driftlens.py` | 12 DriftLens tests (synthetic data, no model download) |
-| `tests/test_mcddd.py` | 10 MCD-DD tests (synthetic 384-d data, no model download) |
+| `tests/test_mcddd.py` | 14 MCD-DD tests (synthetic 384-d data, no model download) |
 
 ---
 
@@ -162,6 +176,12 @@ The threshold updates dynamically: it's the 95th percentile of the positive-pair
 ```bash
 pip install -r drift/requirements.txt
 ```
+
+**GPU (RTX 50-series / Blackwell, sm_120):** the default `torch` wheel built for CUDA 12.4 has no sm_120 kernels, so everything silently runs on the CPU. Install a CUDA 12.8 build instead (needs NVIDIA driver ≥ 570):
+```bash
+pip install --upgrade torch --index-url https://download.pytorch.org/whl/cu128
+```
+Check: `python -c "import torch; print(torch.cuda.get_arch_list())"` must list `sm_120`. The run log line `MCD-DD fit on cuda` / `Loaded Sentence Transformer ... on cuda:0` confirms the GPU is used.
 
 ### 2. Prepare windows (if not already generated)
 
@@ -208,13 +228,13 @@ This produces all 154 daily windows (411,879 tweets) matching the exact Spark cl
 Run unit tests to verify both detectors and downstream monitoring integration (zero external services or GPU needed):
 
 ```bash
-# Test both DriftLens and MCD-DD detectors (22 tests)
+# Test both DriftLens and MCD-DD detectors (26 tests)
 pytest drift/tests/ -v
 
 # Test Task 4 monitoring schema, line protocol, and deduplication (4 tests)
 python monitoring/tests.py
 ```
-*(All 26 tests run in ~10 seconds on synthetic data without downloading models.)*
+*(All 30 tests run in ~10 seconds on synthetic data without downloading models.)*
 
 ---
 
@@ -229,9 +249,10 @@ Results are written to `output/drift/driftlens.jsonl`. Every single line contain
   "driftlens_score": 0.029159,
   "driftlens_alarm": true,
   "threshold": 0.028602,
-  "mcddd_score": 0.004521,
+  "mcddd_score": 1.84,
   "mcddd_alarm": false,
-  "mcddd_threshold": 0.012345,
+  "mcddd_threshold": 2.31,
+  "mcddd_lag": 6,
   "n_posts": 1445,
   "n_used": 1000,
   "is_reference": false,
@@ -246,9 +267,10 @@ Results are written to `output/drift/driftlens.jsonl`. Every single line contain
 | `driftlens_score` | Fréchet distance from the fixed 14-day baseline |
 | `driftlens_alarm` | `true` if `driftlens_score > threshold` (p99 alarm) |
 | `threshold` | DriftLens baseline alarm boundary for this window size |
-| `mcddd_score` | Squared Euclidean distance between consecutive concept vectors |
-| `mcddd_alarm` | `true` if `mcddd_score > mcddd_threshold` (dynamic alarm) |
-| `mcddd_threshold` | MCD-DD dynamic alarm boundary |
+| `mcddd_score` | Max L2 distance between this window's concept vector and those of the previous 10 windows (`null` for reference windows, which are MCD-DD's training data) |
+| `mcddd_alarm` | `true` if `mcddd_score > mcddd_threshold` (p99 alarm) |
+| `mcddd_threshold` | MCD-DD alarm boundary for this window size and context length |
+| `mcddd_lag` | How many windows back the largest discrepancy was (1 = previous day) |
 | `n_posts` / `n_used` | Total posts in window vs sample size evaluated |
 | `is_reference` | `true` for the 14 baseline training windows |
 | `processing_latency_ms` | Processing time for embedding and scoring the window |
@@ -309,11 +331,21 @@ driftlens:
 
 mcddd:
   enabled: true
+  device: ""                  # "" = cuda if usable, else cpu
   hidden_dim: 128             # encoder hidden layer width
   output_dim: 64              # concept vector size
-  n_sub_windows: 5            # splits per window for contrastive pairs
+  n_encoders: 5               # independently trained encoders (ensemble)
+  lambda_gp: 1.0              # gradient penalty (paper default)
+  eps_small: 0.03             # weak-negative noise (standardised units)
+  eps_big: 0.3                # strong-negative noise (1:10 ratio)
   sample_set_size: 100        # items per set in training pairs
-  train_epochs: 3             # gradient steps on reference data
+  k_pairs: 10                 # pairs per day per step
+  train_epochs: 100           # gradient steps on reference data (seconds on GPU)
+  scoring_sample_size: 1000   # tweets per window for scoring
+  context_windows: 10         # newest window vs. the previous 10 (max MCD)
+  holdout_fraction: 0.8       # reference tweets kept out of training, used for calibration
+  n_calibration: 500          # bootstrap draws for the threshold
+  percentile: 99              # alarm = top 1% of in-distribution max-MCD
   model_path: "output/drift/mcddd.pt"
 ```
 

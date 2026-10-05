@@ -22,8 +22,8 @@
   "scenarios": [
     {
       "scenario": "natural",
-      "n_windows": 153,
-      "n_posts": 410455,
+      "n_windows": 154,
+      "n_posts": 411879,
       "concept_drift": null,
       "drift_start_position": null,
       "drift_end_position": null,

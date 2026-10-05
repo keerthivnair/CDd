@@ -78,14 +78,63 @@ def test_large_shift_triggers_alarm():
 
 
 def test_first_score_returns_zero():
-    """First call has no previous window, so MCD should be 0."""
+    """With no context window yet, MCD should be 0."""
     det = MCDDD(input_dim=DIM, hidden_dim=64, output_dim=32,
                 train_epochs=1, seed=42).fit(gaussian(500, seed=1))
-    # Reset _prev_embeddings to simulate first call
-    det._prev_embeddings = None
+    det._context.clear()  # fit() seeds the context with held-out reference rows; simulate none
     r = det.score(gaussian(300, seed=5))
     assert r["mcddd_score"] == 0.0
     assert r["mcddd_alarm"] is False
+
+
+def test_training_pairs_are_fresh_each_step():
+    """Regression: the pair RNG used to be reseeded every step, so every step saw the same batch."""
+    det = MCDDD(input_dim=DIM, hidden_dim=32, output_dim=16, k_pairs=2, sample_set_size=10, seed=0)
+    subs = det._to_sub_windows(gaussian(200, seed=2))
+    a1 = det._generate_pairs(subs)[0]
+    a2 = det._generate_pairs(subs)[0]
+    assert not torch.equal(a1, a2)
+
+
+def _stream_detector(**kw):
+    ref = [gaussian(300, seed=100 + i) for i in range(10)]
+    groups = np.concatenate([np.full(300, i) for i in range(10)])
+    params = dict(input_dim=DIM, hidden_dim=64, output_dim=32, train_epochs=20,
+                  scoring_sample_size=300, context_windows=4, n_calibration=200, seed=42)
+    params.update(kw)
+    return MCDDD(**params).fit(np.vstack(ref), groups)
+
+
+def mixed(n, frac_shift, seed):
+    """n embeddings where a share frac_shift comes from a shifted distribution."""
+    k = int(round(n * frac_shift))
+    return np.vstack([gaussian(n - k, seed=seed), gaussian(k, shift=1.0, seed=seed + 5000)])
+
+
+def test_no_drift_stream_is_quiet():
+    det = _stream_detector()
+    alarms = [det.score(gaussian(300, seed=1000 + i), window_id=i)["mcddd_alarm"] for i in range(30)]
+    assert sum(alarms) <= 2  # p99 threshold -> expect ~0.3 false alarms in 30 windows
+
+
+def test_gradual_drift_detected_through_context():
+    """Each step adds only 10% shifted data; comparing with the whole context still catches it."""
+    det = _stream_detector()
+    for i in range(5):
+        det.score(gaussian(300, seed=2000 + i), window_id=i)
+    alarms = [det.score(mixed(300, 0.1 * (i + 1), seed=3000 + i), window_id=10 + i)["mcddd_alarm"]
+              for i in range(10)]
+    assert any(alarms)
+
+
+def test_volume_change_does_not_change_noise_level():
+    """Windows larger than scoring_sample_size are subsampled, so the threshold stays the same."""
+    det = _stream_detector()
+    for i in range(5):  # fill the 4-window context so both calls compare against the same count
+        det.score(gaussian(300, seed=10 + i), window_id=10 + i)
+    r_small = det.score(gaussian(300, seed=2), window_id=2)
+    r_big = det.score(gaussian(900, seed=3), window_id=3)
+    assert r_big["mcddd_threshold"] == r_small["mcddd_threshold"]
 
 
 def test_save_load_roundtrip(fitted, tmp_path):
@@ -93,6 +142,7 @@ def test_save_load_roundtrip(fitted, tmp_path):
     fitted.save(path)
     loaded = MCDDD.load(path)
     assert loaded.threshold == fitted.threshold
+    assert loaded.params() == fitted.params()
     assert loaded.input_dim == fitted.input_dim
     assert loaded.hidden_dim == fitted.hidden_dim
     # Encoder produces the same output
@@ -110,7 +160,7 @@ def test_uses_384_dimensions():
     det = MCDDD()
     assert det.input_dim == 384
     # Verify the encoder's first layer accepts 384-d input
-    first_layer = det.encoder.item_mlp[0]
+    first_layer = det.encoder.members[0].item_mlp[0]
     assert first_layer.in_features == 384
 
 

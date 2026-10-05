@@ -13,14 +13,11 @@
       },
       "metrics": {
         "driftlens": {
-          "alarms": 122,
-          "stream_windows": 139,
-          "alarm_rate": 0.8777,
+          "alarms": 120,
+          "stream_windows": 140,
+          "alarm_rate": 0.8571,
           "alarm_positions": [
-            18,
-            19,
             28,
-            29,
             32,
             34,
             36,
@@ -138,16 +135,27 @@
             149,
             150,
             151,
-            152
+            152,
+            153
           ]
         },
         "mcddd": {
-          "alarms": 2,
-          "stream_windows": 139,
-          "alarm_rate": 0.0144,
+          "alarms": 12,
+          "stream_windows": 140,
+          "alarm_rate": 0.0857,
           "alarm_positions": [
-            87,
-            103
+            14,
+            15,
+            98,
+            99,
+            101,
+            103,
+            104,
+            106,
+            143,
+            149,
+            151,
+            152
           ]
         }
       }
@@ -213,16 +221,26 @@
           "alarm_rate_after_drift": 1.0
         },
         "mcddd": {
-          "alarms": 0,
+          "alarms": 9,
           "stream_windows": 46,
-          "alarm_rate": 0.0,
-          "alarm_positions": [],
+          "alarm_rate": 0.1957,
+          "alarm_positions": [
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39
+          ],
           "false_alarms_before_drift": 0,
           "false_alarm_rate_before_drift": 0.0,
-          "first_alarm_after_drift": null,
-          "detection_delay": null,
-          "detected_within_tolerance": false,
-          "alarm_rate_after_drift": 0.0
+          "first_alarm_after_drift": 31,
+          "detection_delay": 1,
+          "detected_within_tolerance": true,
+          "alarm_rate_after_drift": 0.3
         }
       }
     },
@@ -245,10 +263,11 @@
       },
       "metrics": {
         "driftlens": {
-          "alarms": 28,
+          "alarms": 29,
           "stream_windows": 46,
-          "alarm_rate": 0.6087,
+          "alarm_rate": 0.6304,
           "alarm_positions": [
+            31,
             32,
             33,
             34,
@@ -280,22 +299,24 @@
           ],
           "false_alarms_before_drift": 0,
           "false_alarm_rate_before_drift": 0.0,
-          "first_alarm_after_drift": 32,
-          "detection_delay": 2,
+          "first_alarm_after_drift": 31,
+          "detection_delay": 1,
           "detected_within_tolerance": true,
-          "alarm_rate_after_drift": 0.9333
+          "alarm_rate_after_drift": 0.9667
         },
         "mcddd": {
-          "alarms": 0,
+          "alarms": 1,
           "stream_windows": 46,
-          "alarm_rate": 0.0,
-          "alarm_positions": [],
+          "alarm_rate": 0.0217,
+          "alarm_positions": [
+            44
+          ],
           "false_alarms_before_drift": 0,
           "false_alarm_rate_before_drift": 0.0,
-          "first_alarm_after_drift": null,
-          "detection_delay": null,
-          "detected_within_tolerance": false,
-          "alarm_rate_after_drift": 0.0
+          "first_alarm_after_drift": 44,
+          "detection_delay": 14,
+          "detected_within_tolerance": true,
+          "alarm_rate_after_drift": 0.0333
         }
       }
     },
@@ -314,12 +335,14 @@
       },
       "metrics": {
         "driftlens": {
-          "alarms": 0,
+          "alarms": 1,
           "stream_windows": 46,
-          "alarm_rate": 0.0,
-          "alarm_positions": [],
+          "alarm_rate": 0.0217,
+          "alarm_positions": [
+            48
+          ],
           "false_alarm_rate_before_volume_change": 0.0,
-          "false_alarm_rate_after_volume_change": 0.0,
+          "false_alarm_rate_after_volume_change": 0.0333,
           "alarm_at_volume_change": false
         },
         "mcddd": {

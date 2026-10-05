@@ -2,7 +2,7 @@
   "scenario": "no_drift",
   "description": "Old concept throughout at a constant window size. Nothing changes.",
   "windows_path": "experiments/scenarios/no_drift/windows.jsonl",
-  "windows_sha256": "86d609a45d9610adf583976f88348205f710829f59752b060e8462a0facb2c43",
+  "windows_sha256": "1893e8c0f75330036fd3b2f687f73e54dae192dbb19817a28a87094416d5d104",
   "source_windows": "windows_all.jsonl",
   "concepts": {
     "old": {
@@ -15,8 +15,8 @@
     }
   },
   "pool_sizes": {
-    "old": 124426,
-    "new": 137512
+    "old": 124366,
+    "new": 137394
   },
   "tweets_used": {
     "old": 60000,
@@ -349,6 +349,7 @@
         18409,
         18410,
         18411,
+        18412,
         18413
       ]
     },
@@ -447,6 +448,7 @@
         18405,
         18406,
         18407,
+        18408,
         18409,
         18410,
         18411,
@@ -466,7 +468,6 @@
       "source_window_ids": [
         18371,
         18374,
-        18375,
         18376,
         18377,
         18378,
@@ -518,6 +519,7 @@
       "source_window_ids": [
         18371,
         18374,
+        18375,
         18376,
         18377,
         18378,
@@ -568,7 +570,6 @@
       "frac_new": 0.0,
       "source_window_ids": [
         18374,
-        18375,
         18376,
         18377,
         18378,
@@ -2480,6 +2481,7 @@
       "source_window_ids": [
         18371,
         18374,
+        18375,
         18376,
         18377,
         18378,
@@ -2581,7 +2583,6 @@
       "n_new": 0,
       "frac_new": 0.0,
       "source_window_ids": [
-        18371,
         18374,
         18375,
         18376,
@@ -2739,7 +2740,6 @@
       "source_window_ids": [
         18371,
         18374,
-        18375,
         18376,
         18377,
         18378,
@@ -2892,7 +2892,6 @@
       "n_new": 0,
       "frac_new": 0.0,
       "source_window_ids": [
-        18371,
         18374,
         18375,
         18376,

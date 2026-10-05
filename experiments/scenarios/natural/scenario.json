@@ -2,9 +2,9 @@
   "scenario": "natural",
   "description": "Original COVID windows in chronological order, unchanged. No injected change; the true drift points are unknown.",
   "windows_path": "windows_all.jsonl",
-  "windows_sha256": "e16fe8449e1996aa8b7f43705ce32a1eb6383c54e4b62b4d12a4d7b51a81b57a",
-  "n_windows": 153,
-  "n_posts": 410455,
+  "windows_sha256": "b43f3fc76b23547879b0ccb5f13bc458b2f353f2ccc3206ed877ef8cb7d075c8",
+  "n_windows": 154,
+  "n_posts": 411879,
   "ground_truth": {
     "concept_drift": null,
     "drift_start": null,
@@ -1084,6 +1084,13 @@
       "window_start": "2021-06-26T00:00:00",
       "phase": "stream",
       "n_posts": 1850
+    },
+    {
+      "position": 153,
+      "window_id": 18805,
+      "window_start": "2021-06-27T00:00:00",
+      "phase": "stream",
+      "n_posts": 1424
     }
   ]
 }

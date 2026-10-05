@@ -22,19 +22,27 @@ driftlens:
 
 mcddd:
   enabled: true
+  device: ""                             # "" = auto (cuda if usable), or "cpu" / "cuda"
   hidden_dim: 128                        # Deep Sets encoder hidden layer width
   output_dim: 64                         # concept embedding dimensionality
+  n_encoders: 5                          # ensemble of independently trained encoders (one was seed-dependent)
   lr: 0.001                              # Adam learning rate
-  lambda_gp: 0.1                         # gradient penalty weight (Lipschitz regulariser)
-  lipschitz_k: 1.0                       # target gradient norm
-  eps_small: 0.01                        # noise scale for weak-negative pairs
-  eps_big: 0.1                           # noise scale for strong-negative pairs
-  n_sub_windows: 5                       # sub-windows per window for contrastive pairs
-  sample_set_size: 100                   # items per set in contrastive pairs
-  k_pairs: 5                             # contrastive pairs per sub-window
-  train_epochs: 3                        # gradient steps during offline fitting
+  lambda_gp: 1.0                         # gradient penalty weight (paper default 1; 0 = off)
+  lipschitz_k: 1.0                       # target per-item gradient norm for the penalty
+  eps_small: 0.03                        # weak-negative noise std (standardised units)
+  eps_big: 0.3                           # strong-negative noise std (paper's 1:10 ratio; 1.0 killed sensitivity)
+  n_sub_windows: 5                       # sub-windows used only when no per-window grouping is available
+  sample_set_size: 100                   # items per set in contrastive training pairs (paper m)
+  k_pairs: 10                            # contrastive pairs per sub-window per step (paper k = 10)
+  train_epochs: 100                      # offline gradient steps, fresh pairs each step (GPU: ~seconds)
+  scoring_sample_size: 1000              # max tweets per window used for scoring (= DriftLens window_sample_size)
+  context_windows: 10                    # newest window is compared with this many previous windows (max MCD)
+  holdout_fraction: 0.8                  # share of each reference window kept out of training; must hold (context_windows+1)*scoring_sample_size rows
+  n_calibration: 500                     # bootstrap draws for the alarm threshold
+  percentile: 99.0                       # threshold = this percentile of in-distribution MCDs
+  online_training: false                 # one encoder step per scored window (+ recalibration) if true
   seed: 42
-  model_path: "output/drift/mcddd.pt"   # saved encoder weights + threshold
+  model_path: "output/drift/mcddd.pt"   # saved encoder, standardisation, reference pool + thresholds
 
 output:
   reference_path: "output/drift/reference.npz"
