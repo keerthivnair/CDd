@@ -1,0 +1,9 @@
+scenario,detector,TP,TN,FP,FN,precision,recall,f1,false_alarm_rate,stream_windows,first_alarm_position,detection_delay
+sudden,driftlens,30,16,0,0,1.0,1.0,1.0,0.0,46,30,0
+sudden,mcddd,12,16,0,18,1.0,0.4,0.5714285714285715,0.0,46,30,0
+gradual,driftlens,29,16,0,1,1.0,0.9666666666666667,0.983050847457627,0.0,46,31,1
+gradual,mcddd,0,16,0,30,0.0,0.0,0.0,0.0,46,,
+volume,driftlens,0,45,1,0,0.0,0.0,0.0,0.021739130434782608,46,,
+volume,mcddd,0,46,0,0,0.0,0.0,0.0,0.0,46,,
+no_drift,driftlens,0,46,0,0,0.0,0.0,0.0,0.0,46,,
+no_drift,mcddd,0,45,1,0,0.0,0.0,0.0,0.021739130434782608,46,,

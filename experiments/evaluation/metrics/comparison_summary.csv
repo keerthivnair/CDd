@@ -1,0 +1,5 @@
+scenario,driftlens_precision,mcddd_precision,driftlens_recall,mcddd_recall,driftlens_f1,mcddd_f1,driftlens_false_alarm_rate,mcddd_false_alarm_rate,driftlens_detection_delay,mcddd_detection_delay,agreement_rate,disagreement_rate
+sudden,1.0,1.0,1.0,0.4,1.0,0.5714285714285715,0.0,0.0,0.0,0.0,0.6086956521739131,0.391304347826087
+gradual,1.0,0.0,0.9666666666666668,0.0,0.983050847457627,0.0,0.0,0.0,1.0,,0.3695652173913043,0.6304347826086957
+volume,0.0,0.0,0.0,0.0,0.0,0.0,0.0217391304347826,0.0,,,0.9782608695652174,0.0217391304347826
+no_drift,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0217391304347826,,,0.9782608695652174,0.0217391304347826

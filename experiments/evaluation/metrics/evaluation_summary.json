@@ -1,0 +1,199 @@
+{
+  "reference_windows": 14,
+  "scenarios": [
+    "sudden",
+    "gradual",
+    "volume",
+    "no_drift"
+  ],
+  "classification_metrics": [
+    {
+      "scenario": "sudden",
+      "detector": "driftlens",
+      "TP": 30,
+      "TN": 16,
+      "FP": 0,
+      "FN": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "false_alarm_rate": 0.0,
+      "stream_windows": 46,
+      "first_alarm_position": 30,
+      "detection_delay": 0
+    },
+    {
+      "scenario": "sudden",
+      "detector": "mcddd",
+      "TP": 12,
+      "TN": 16,
+      "FP": 0,
+      "FN": 18,
+      "precision": 1.0,
+      "recall": 0.4,
+      "f1": 0.5714285714285715,
+      "false_alarm_rate": 0.0,
+      "stream_windows": 46,
+      "first_alarm_position": 30,
+      "detection_delay": 0
+    },
+    {
+      "scenario": "gradual",
+      "detector": "driftlens",
+      "TP": 29,
+      "TN": 16,
+      "FP": 0,
+      "FN": 1,
+      "precision": 1.0,
+      "recall": 0.9666666666666667,
+      "f1": 0.983050847457627,
+      "false_alarm_rate": 0.0,
+      "stream_windows": 46,
+      "first_alarm_position": 31,
+      "detection_delay": 1
+    },
+    {
+      "scenario": "gradual",
+      "detector": "mcddd",
+      "TP": 0,
+      "TN": 16,
+      "FP": 0,
+      "FN": 30,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "false_alarm_rate": 0.0,
+      "stream_windows": 46,
+      "first_alarm_position": null,
+      "detection_delay": null
+    },
+    {
+      "scenario": "volume",
+      "detector": "driftlens",
+      "TP": 0,
+      "TN": 45,
+      "FP": 1,
+      "FN": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "false_alarm_rate": 0.021739130434782608,
+      "stream_windows": 46,
+      "first_alarm_position": null,
+      "detection_delay": null
+    },
+    {
+      "scenario": "volume",
+      "detector": "mcddd",
+      "TP": 0,
+      "TN": 46,
+      "FP": 0,
+      "FN": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "false_alarm_rate": 0.0,
+      "stream_windows": 46,
+      "first_alarm_position": null,
+      "detection_delay": null
+    },
+    {
+      "scenario": "no_drift",
+      "detector": "driftlens",
+      "TP": 0,
+      "TN": 46,
+      "FP": 0,
+      "FN": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "false_alarm_rate": 0.0,
+      "stream_windows": 46,
+      "first_alarm_position": null,
+      "detection_delay": null
+    },
+    {
+      "scenario": "no_drift",
+      "detector": "mcddd",
+      "TP": 0,
+      "TN": 45,
+      "FP": 1,
+      "FN": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "false_alarm_rate": 0.021739130434782608,
+      "stream_windows": 46,
+      "first_alarm_position": null,
+      "detection_delay": null
+    }
+  ],
+  "agreement": [
+    {
+      "both_alarm": 12,
+      "both_no_alarm": 16,
+      "driftlens_only": 18,
+      "mcddd_only": 0,
+      "agreement_rate": 0.6086956521739131,
+      "disagreement_rate": 0.391304347826087,
+      "scenario": "sudden"
+    },
+    {
+      "both_alarm": 0,
+      "both_no_alarm": 17,
+      "driftlens_only": 29,
+      "mcddd_only": 0,
+      "agreement_rate": 0.3695652173913043,
+      "disagreement_rate": 0.6304347826086957,
+      "scenario": "gradual"
+    },
+    {
+      "both_alarm": 0,
+      "both_no_alarm": 45,
+      "driftlens_only": 1,
+      "mcddd_only": 0,
+      "agreement_rate": 0.9782608695652174,
+      "disagreement_rate": 0.021739130434782608,
+      "scenario": "volume"
+    },
+    {
+      "both_alarm": 0,
+      "both_no_alarm": 45,
+      "driftlens_only": 0,
+      "mcddd_only": 1,
+      "agreement_rate": 0.9782608695652174,
+      "disagreement_rate": 0.021739130434782608,
+      "scenario": "no_drift"
+    }
+  ],
+  "performance": [
+    {
+      "scenario": "sudden",
+      "mean_latency_ms": 578.2208695652174,
+      "median_latency_ms": 542.55,
+      "mean_throughput_posts_sec": 1820.2252173913043,
+      "median_throughput_posts_sec": 1843.165
+    },
+    {
+      "scenario": "gradual",
+      "mean_latency_ms": 582.1167391304348,
+      "median_latency_ms": 543.75,
+      "mean_throughput_posts_sec": 1804.2097826086956,
+      "median_throughput_posts_sec": 1839.29
+    },
+    {
+      "scenario": "volume",
+      "mean_latency_ms": 1066.6108695652174,
+      "median_latency_ms": 1226.225,
+      "mean_throughput_posts_sec": 2139.2415217391303,
+      "median_throughput_posts_sec": 2192.0299999999997
+    },
+    {
+      "scenario": "no_drift",
+      "mean_latency_ms": 566.3534782608696,
+      "median_latency_ms": 524.4,
+      "mean_throughput_posts_sec": 1852.1002173913043,
+      "median_throughput_posts_sec": 1906.9450000000002
+    }
+  ]
+}

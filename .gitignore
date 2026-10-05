@@ -7,3 +7,10 @@ __pycache__/
 .venv/
 *.pyc
 experiments/scenarios/*/windows.jsonl
+
+# Kaggle / local model artifacts
+all-MiniLM-L6-v2.zip
+kaggle_model/
+kaggle_scenarios.zip
+kaggle_scenarios/
+person3_metrics.zip
