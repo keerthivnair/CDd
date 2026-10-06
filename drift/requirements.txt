@@ -5,3 +5,4 @@ numpy
 pyyaml
 pytest
 torch
+matplotlib  # experiments/evaluation/metrics plots

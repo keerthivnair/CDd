@@ -1,11 +1,24 @@
+"""Person 3 evaluation: DriftLens vs MCD-DD metrics, agreement, performance and plots.
 
+Reads each scenario's detector output (the scores_path in experiments/scenarios/<name>/config.yaml,
+i.e. output/experiments/<name>/scores.jsonl written by drift/run_drift.py) and its ground truth
+(experiments/scenarios/<name>/scenario.json). Writes CSVs, JSON and plots to experiments/evaluation/metrics/.
+
+Run (from anywhere):
+    python experiments/evaluation/metrics/evaluate_metrics.py
+    python experiments/evaluation/metrics/evaluate_metrics.py --input-dir DIR   # DIR/<scenario>/drift_results.jsonl
+"""
+import argparse
 import json
 import os
 import csv
 import statistics
 from pathlib import Path
 
+import matplotlib
+matplotlib.use("Agg")  # write files only; no display needed
 import matplotlib.pyplot as plt
+import yaml
 
 
 # ============================================================
@@ -15,42 +28,56 @@ import matplotlib.pyplot as plt
 SCENARIOS = ["sudden", "gradual", "volume", "no_drift"]
 DETECTORS = ["driftlens", "mcddd"]
 
-BASE = Path("experiments")
-RESULTS_DIR = BASE / "results"
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+BASE = PROJECT_ROOT / "experiments"
+SCENARIOS_DIR = BASE / "scenarios"
 OUT_DIR = BASE / "evaluation" / "metrics"
 PLOTS_DIR = OUT_DIR / "plots"
 
 REFERENCE_WINDOWS = 14
 
-# Exact ground truth from Person 2 controlled experiments.
-GROUND_TRUTH = {
-    "sudden": {
-        "concept_drift": True,
-        "drift_start": 30,
-        "drift_end": 30,
-    },
-    "gradual": {
-        "concept_drift": True,
-        "drift_start": 30,
-        "drift_end": 45,
-    },
-    "volume": {
+# Optional override: DIR/<scenario>/drift_results.jsonl (e.g. results downloaded from Kaggle).
+INPUT_DIR = None
+
+
+def load_ground_truth(scenario):
+    """Ground truth from Person 2's scenario.json (positions are 0-based window indices)."""
+    with open(SCENARIOS_DIR / scenario / "scenario.json", encoding="utf-8") as f:
+        gt = json.load(f)["ground_truth"]
+
+    if gt["concept_drift"]:
+        return {
+            "concept_drift": True,
+            "drift_start": gt["drift_start"]["position"],
+            "drift_end": gt["drift_end"]["position"],
+        }
+
+    vol = gt.get("volume_change")
+    return {
         "concept_drift": False,
-        "volume_change": 30,
-    },
-    "no_drift": {
-        "concept_drift": False,
-        "volume_change": None,
-    },
-}
+        "volume_change": vol["position"] if vol else None,
+    }
+
+
+GROUND_TRUTH = {s: load_ground_truth(s) for s in SCENARIOS}
 
 
 # ============================================================
 # Utility functions
 # ============================================================
 
+def results_path(scenario):
+    if INPUT_DIR is not None:
+        return INPUT_DIR / scenario / "drift_results.jsonl"
+
+    # Same file drift/run_drift.py writes for this scenario.
+    with open(SCENARIOS_DIR / scenario / "config.yaml", encoding="utf-8") as f:
+        scores = yaml.safe_load(f)["output"]["scores_path"]
+    return PROJECT_ROOT / scores
+
+
 def load_results(scenario):
-    path = RESULTS_DIR / scenario / "drift_results.jsonl"
+    path = results_path(scenario)
 
     if not path.exists():
         raise FileNotFoundError(f"Missing result file: {path}")
@@ -73,6 +100,15 @@ def safe_rate(numerator, denominator):
 
 def detector_alarm(row, detector):
     return bool(row.get(f"{detector}_alarm") is True)
+
+
+def threshold_ratio(row, detector):
+    """score / threshold: > 1 means alarm. Makes the two detectors' scores comparable."""
+    score = row.get(f"{detector}_score")
+    threshold = row.get("threshold" if detector == "driftlens" else "mcddd_threshold")
+    if score is None or not threshold:
+        return None
+    return score / threshold
 
 
 # ============================================================
@@ -280,8 +316,12 @@ def build_window_comparison(rows, scenario):
             "window_start": row.get("window_start"),
             "ground_truth_drift": ground_truth,
             "driftlens_score": row.get("driftlens_score"),
+            "driftlens_threshold": row.get("threshold"),
+            "driftlens_ratio": threshold_ratio(row, "driftlens"),
             "driftlens_alarm": dl_alarm,
             "mcddd_score": row.get("mcddd_score"),
+            "mcddd_threshold": row.get("mcddd_threshold"),
+            "mcddd_ratio": threshold_ratio(row, "mcddd"),
             "mcddd_alarm": mc_alarm,
             "agreement": agreement,
             "latency_ms": row.get("processing_latency_ms"),
@@ -382,13 +422,15 @@ def make_plots(all_windows):
 
         positions = [r["position"] for r in rows]
 
+        # Raw scores have different units (DriftLens ~0.02-0.06, MCD-DD ~0.5-1.5), so plot
+        # score / threshold: both detectors alarm above 1.
         dl_scores = [
-            r["driftlens_score"]
+            r["driftlens_ratio"]
             for r in rows
         ]
 
         mc_scores = [
-            r["mcddd_score"]
+            r["mcddd_ratio"]
             for r in rows
         ]
 
@@ -397,13 +439,22 @@ def make_plots(all_windows):
         plt.plot(
             positions,
             dl_scores,
+            marker=".",
             label="DriftLens"
         )
 
         plt.plot(
             positions,
             mc_scores,
+            marker=".",
             label="MCD-DD"
+        )
+
+        plt.axhline(
+            1.0,
+            color="grey",
+            linewidth=1,
+            label="Alarm threshold"
         )
 
         truth = GROUND_TRUTH[scenario]
@@ -430,7 +481,7 @@ def make_plots(all_windows):
             )
 
         plt.xlabel("Window position")
-        plt.ylabel("Detector score")
+        plt.ylabel("Score / threshold (alarm if > 1)")
         plt.title(f"Detector Scores — {scenario}")
         plt.legend()
         plt.tight_layout()
@@ -465,7 +516,7 @@ def make_plots(all_windows):
             latency_by_scenario[s]
             for s in SCENARIOS
         ],
-        labels=SCENARIOS
+        tick_labels=SCENARIOS
     )
 
     plt.ylabel("Processing latency (ms)")
@@ -504,7 +555,7 @@ def make_plots(all_windows):
             throughput_by_scenario[s]
             for s in SCENARIOS
         ],
-        labels=SCENARIOS
+        tick_labels=SCENARIOS
     )
 
     plt.ylabel("Throughput (posts/sec)")
@@ -524,7 +575,35 @@ def make_plots(all_windows):
 # Main evaluation
 # ============================================================
 
+def build_comparison_summary(classification_rows, agreement_rows):
+    """One row per scenario with both detectors side by side (comparison_summary.csv)."""
+    by_key = {(r["scenario"], r["detector"]): r for r in classification_rows}
+    agreement = {r["scenario"]: r for r in agreement_rows}
+    output = []
+
+    for scenario in SCENARIOS:
+        row = {"scenario": scenario}
+        for metric in ["precision", "recall", "f1", "false_alarm_rate", "detection_delay"]:
+            for detector in DETECTORS:
+                row[f"{detector}_{metric}"] = by_key[(scenario, detector)][metric]
+        row["agreement_rate"] = agreement[scenario]["agreement_rate"]
+        row["disagreement_rate"] = agreement[scenario]["disagreement_rate"]
+        output.append(row)
+
+    return output
+
+
 def main():
+    global INPUT_DIR
+
+    parser = argparse.ArgumentParser(description="Person 3 evaluation of DriftLens vs MCD-DD")
+    parser.add_argument(
+        "--input-dir",
+        help="Read DIR/<scenario>/drift_results.jsonl instead of the scenario configs' scores_path"
+    )
+    args = parser.parse_args()
+    if args.input_dir:
+        INPUT_DIR = Path(args.input_dir).resolve()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     PLOTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -540,7 +619,7 @@ def main():
 
         rows = load_results(scenario)
 
-        print(f"  Windows: {len(rows)}")
+        print(f"  Windows: {len(rows)} ({results_path(scenario).relative_to(PROJECT_ROOT)})")
 
         # Classification metrics
         for detector in DETECTORS:
@@ -612,6 +691,11 @@ def main():
     )
 
     write_csv(
+        OUT_DIR / "comparison_summary.csv",
+        build_comparison_summary(classification_rows, agreement_rows)
+    )
+
+    write_csv(
         OUT_DIR / "performance.csv",
         performance_rows
     )
@@ -645,6 +729,7 @@ def main():
         encoding="utf-8"
     ) as f:
         json.dump(summary, f, indent=2)
+        f.write("\n")
 
     print("\n" + "=" * 60)
     print("PERSON 3 EVALUATION COMPLETE")
@@ -653,6 +738,7 @@ def main():
     print("\nGenerated:")
     print("  metrics.csv")
     print("  detector_agreement.csv")
+    print("  comparison_summary.csv")
     print("  performance.csv")
     print("  window_comparison.csv")
     print("  evaluation_summary.json")

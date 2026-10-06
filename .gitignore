@@ -1,5 +1,12 @@
 checkpoints/
-output/
+# Generated outputs: only the small result files (detector scores + comparisons) are tracked.
+# Models (.pt/.npz) and embedding caches are large and are rebuilt by drift/run_drift.py.
+output/**
+!output/**/
+!output/drift/*.jsonl
+!output/drift/*.json
+!output/experiments/*/*.jsonl
+!output/experiments/*/*.json
 windows_full_backup/
 windows_all.jsonl
 __pycache__/

@@ -1,0 +1,23 @@
+{
+  "source": "output/experiments/no_drift/scores.jsonl",
+  "stream_windows": 46,
+  "driftlens_alarms": 0,
+  "mcddd_alarms": 0,
+  "agreement": {
+    "neither": 46
+  },
+  "agreement_rate": 1.0,
+  "mcddd_alarms_also_flagged_by_driftlens": "0/0",
+  "by_month": {
+    "2000-01": {
+      "windows": 17,
+      "driftlens_alarms": 0,
+      "mcddd_alarms": 0
+    },
+    "2000-02": {
+      "windows": 29,
+      "driftlens_alarms": 0,
+      "mcddd_alarms": 0
+    }
+  }
+}

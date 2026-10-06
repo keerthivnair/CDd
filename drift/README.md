@@ -159,6 +159,7 @@ Deviations from the paper: the encoder is trained offline on the reference only 
 | `driftlens.py` | DriftLens core (PCA, Gaussian stats, FDD, calibration, save/load) |
 | `mcddd.py` | MCD-DD core (Deep Sets encoder, contrastive training, MCD scoring) |
 | `embedder.py` | Sentence Transformer wrapper + per-window `.npy` cache |
+| `compare_detectors.py` | Side-by-side DriftLens vs MCD-DD per window → `comparison.jsonl` + `comparison_summary.json` |
 | `prepare_windows.py` | Offline utility: converts Kaggle CSVs into cleaned 1-day windows (`windows_all.jsonl`) |
 | `config.yaml` | All settings (embedding model, DriftLens params, MCD-DD params) |
 | `requirements.txt` | Python dependencies |
@@ -239,6 +240,8 @@ python monitoring/tests.py
 ---
 
 ## Output: All Windows Compared Side-by-Side
+
+For a cleaner comparison file, run `python drift/compare_detectors.py` (or `--scores output/experiments/<name>/scores.jsonl`). It writes `comparison.jsonl` next to the scores. Each row holds both detectors' score, threshold and **score/threshold ratio** (the raw scores have different units, while the ratios are comparable, >1 = alarm), plus `agreement`: `both` / `driftlens_only` / `mcddd_only` / `neither`. A monthly alarm summary goes to `comparison_summary.json`.
 
 Results are written to `output/drift/driftlens.jsonl`. Every single line contains the simultaneous evaluation of **both** detectors for that day:
 
@@ -353,20 +356,22 @@ mcddd:
 
 ## Results on the full dataset
 
-153 daily windows, 410k tweets, 2020-04-19 to 2021-06-26.
+154 daily windows, 412k tweets, 2020-04-19 to 2021-06-27 (rerun 2026-10-06 with the fixed MCD-DD; per-window results in `output/drift/driftlens.jsonl`, side by side in `output/drift/comparison.jsonl`).
 
-**DriftLens:** 122 of 139 post-reference windows alarmed. Drift is gradual — May 2020 stays close to the baseline (median FDD 0.027), then steadily climbs. By 2021, median scores (0.058–0.070) are ~2× higher than mid-2020 (0.036–0.041). Sharpest spike: 2020-10-02 (FDD 0.163) — the day of the US president's COVID-19 diagnosis.
+**DriftLens:** 120 of 140 post-reference windows alarmed. Drift is gradual: May 2020 stays close to the baseline (median FDD 0.027), then steadily climbs. By 2021, median scores (0.058–0.076) are ~2× higher than mid-2020 (0.036–0.041). Sharpest spike: 2020-10-02 (FDD 0.164), the day of the US president's COVID-19 diagnosis.
 
-| Month | Windows | Alarms | Median FDD |
-|---|---|---|---|
-| 2020-05 (post-ref) | 26 | 10 | 0.0267 |
-| 2020-06 | 17 | 16 | 0.0363 |
-| 2020-08 | 10 | 10 | 0.0414 |
-| 2020-09 | 19 | 19 | 0.0358 |
-| 2020-10 | 20 | 20 | 0.0398 |
-| 2021-04 | 5 | 5 | 0.0695 |
-| 2021-05 | 24 | 24 | 0.0610 |
-| 2021-06 | 18 | 18 | 0.0575 |
+**MCD-DD:** 12 of 140 windows alarmed. It flags *recent* changes rather than distance from the start: early May 2020, mid-October 2020 (the days after the 2020-10-02 spike), 2021-04-26 (the first day of 2021 data, after a gap of several months) and late June 2021. 10 of its 12 alarms are also DriftLens alarms.
+
+| Month | Windows | DriftLens alarms | Median FDD | MCD-DD alarms |
+|---|---|---|---|---|
+| 2020-05 (post-ref) | 26 | 7 | 0.0271 | 2 |
+| 2020-06 | 17 | 16 | 0.0363 | 0 |
+| 2020-08 | 10 | 10 | 0.0409 | 0 |
+| 2020-09 | 19 | 19 | 0.0365 | 0 |
+| 2020-10 | 20 | 20 | 0.0395 | 5 |
+| 2021-04 | 5 | 5 | 0.0756 | 1 |
+| 2021-05 | 24 | 24 | 0.0603 | 0 |
+| 2021-06 | 19 | 19 | 0.0575 | 4 |
 
 ---
 

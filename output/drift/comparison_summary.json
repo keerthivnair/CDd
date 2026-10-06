@@ -1,0 +1,56 @@
+{
+  "source": "output/drift/driftlens.jsonl",
+  "stream_windows": 140,
+  "driftlens_alarms": 120,
+  "mcddd_alarms": 12,
+  "agreement": {
+    "mcddd_only": 2,
+    "neither": 18,
+    "driftlens_only": 110,
+    "both": 10
+  },
+  "agreement_rate": 0.2,
+  "mcddd_alarms_also_flagged_by_driftlens": "10/12",
+  "by_month": {
+    "2020-05": {
+      "windows": 26,
+      "driftlens_alarms": 7,
+      "mcddd_alarms": 2
+    },
+    "2020-06": {
+      "windows": 17,
+      "driftlens_alarms": 16,
+      "mcddd_alarms": 0
+    },
+    "2020-08": {
+      "windows": 10,
+      "driftlens_alarms": 10,
+      "mcddd_alarms": 0
+    },
+    "2020-09": {
+      "windows": 19,
+      "driftlens_alarms": 19,
+      "mcddd_alarms": 0
+    },
+    "2020-10": {
+      "windows": 20,
+      "driftlens_alarms": 20,
+      "mcddd_alarms": 5
+    },
+    "2021-04": {
+      "windows": 5,
+      "driftlens_alarms": 5,
+      "mcddd_alarms": 1
+    },
+    "2021-05": {
+      "windows": 24,
+      "driftlens_alarms": 24,
+      "mcddd_alarms": 0
+    },
+    "2021-06": {
+      "windows": 19,
+      "driftlens_alarms": 19,
+      "mcddd_alarms": 4
+    }
+  }
+}

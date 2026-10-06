@@ -1,0 +1,25 @@
+{
+  "source": "output/experiments/sudden/scores.jsonl",
+  "stream_windows": 46,
+  "driftlens_alarms": 30,
+  "mcddd_alarms": 9,
+  "agreement": {
+    "neither": 16,
+    "driftlens_only": 21,
+    "both": 9
+  },
+  "agreement_rate": 0.5435,
+  "mcddd_alarms_also_flagged_by_driftlens": "9/9",
+  "by_month": {
+    "2000-01": {
+      "windows": 17,
+      "driftlens_alarms": 1,
+      "mcddd_alarms": 0
+    },
+    "2000-02": {
+      "windows": 29,
+      "driftlens_alarms": 29,
+      "mcddd_alarms": 9
+    }
+  }
+}

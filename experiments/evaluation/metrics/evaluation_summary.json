@@ -25,17 +25,17 @@
     {
       "scenario": "sudden",
       "detector": "mcddd",
-      "TP": 12,
+      "TP": 9,
       "TN": 16,
       "FP": 0,
-      "FN": 18,
+      "FN": 21,
       "precision": 1.0,
-      "recall": 0.4,
-      "f1": 0.5714285714285715,
+      "recall": 0.3,
+      "f1": 0.4615384615384615,
       "false_alarm_rate": 0.0,
       "stream_windows": 46,
-      "first_alarm_position": 30,
-      "detection_delay": 0
+      "first_alarm_position": 31,
+      "detection_delay": 1
     },
     {
       "scenario": "gradual",
@@ -55,17 +55,17 @@
     {
       "scenario": "gradual",
       "detector": "mcddd",
-      "TP": 0,
+      "TP": 1,
       "TN": 16,
       "FP": 0,
-      "FN": 30,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
+      "FN": 29,
+      "precision": 1.0,
+      "recall": 0.03333333333333333,
+      "f1": 0.06451612903225806,
       "false_alarm_rate": 0.0,
       "stream_windows": 46,
-      "first_alarm_position": null,
-      "detection_delay": null
+      "first_alarm_position": 44,
+      "detection_delay": 14
     },
     {
       "scenario": "volume",
@@ -116,13 +116,13 @@
       "scenario": "no_drift",
       "detector": "mcddd",
       "TP": 0,
-      "TN": 45,
-      "FP": 1,
+      "TN": 46,
+      "FP": 0,
       "FN": 0,
       "precision": 0.0,
       "recall": 0.0,
       "f1": 0.0,
-      "false_alarm_rate": 0.021739130434782608,
+      "false_alarm_rate": 0.0,
       "stream_windows": 46,
       "first_alarm_position": null,
       "detection_delay": null
@@ -130,21 +130,21 @@
   ],
   "agreement": [
     {
-      "both_alarm": 12,
+      "both_alarm": 9,
       "both_no_alarm": 16,
-      "driftlens_only": 18,
+      "driftlens_only": 21,
       "mcddd_only": 0,
-      "agreement_rate": 0.6086956521739131,
-      "disagreement_rate": 0.391304347826087,
+      "agreement_rate": 0.5434782608695652,
+      "disagreement_rate": 0.45652173913043476,
       "scenario": "sudden"
     },
     {
-      "both_alarm": 0,
+      "both_alarm": 1,
       "both_no_alarm": 17,
-      "driftlens_only": 29,
+      "driftlens_only": 28,
       "mcddd_only": 0,
-      "agreement_rate": 0.3695652173913043,
-      "disagreement_rate": 0.6304347826086957,
+      "agreement_rate": 0.391304347826087,
+      "disagreement_rate": 0.6086956521739131,
       "scenario": "gradual"
     },
     {
@@ -158,42 +158,42 @@
     },
     {
       "both_alarm": 0,
-      "both_no_alarm": 45,
+      "both_no_alarm": 46,
       "driftlens_only": 0,
-      "mcddd_only": 1,
-      "agreement_rate": 0.9782608695652174,
-      "disagreement_rate": 0.021739130434782608,
+      "mcddd_only": 0,
+      "agreement_rate": 1.0,
+      "disagreement_rate": 0.0,
       "scenario": "no_drift"
     }
   ],
   "performance": [
     {
       "scenario": "sudden",
-      "mean_latency_ms": 578.2208695652174,
-      "median_latency_ms": 542.55,
-      "mean_throughput_posts_sec": 1820.2252173913043,
-      "median_throughput_posts_sec": 1843.165
+      "mean_latency_ms": 309.31260869565216,
+      "median_latency_ms": 284.77,
+      "mean_throughput_posts_sec": 3431.498260869565,
+      "median_throughput_posts_sec": 3511.73
     },
     {
       "scenario": "gradual",
-      "mean_latency_ms": 582.1167391304348,
-      "median_latency_ms": 543.75,
-      "mean_throughput_posts_sec": 1804.2097826086956,
-      "median_throughput_posts_sec": 1839.29
+      "mean_latency_ms": 313.5973913043478,
+      "median_latency_ms": 286.1,
+      "mean_throughput_posts_sec": 3419.376956521739,
+      "median_throughput_posts_sec": 3495.3
     },
     {
       "scenario": "volume",
-      "mean_latency_ms": 1066.6108695652174,
-      "median_latency_ms": 1226.225,
-      "mean_throughput_posts_sec": 2139.2415217391303,
-      "median_throughput_posts_sec": 2192.0299999999997
+      "mean_latency_ms": 639.7304347826087,
+      "median_latency_ms": 776.23,
+      "mean_throughput_posts_sec": 3626.283043478261,
+      "median_throughput_posts_sec": 3762.83
     },
     {
       "scenario": "no_drift",
-      "mean_latency_ms": 566.3534782608696,
-      "median_latency_ms": 524.4,
-      "mean_throughput_posts_sec": 1852.1002173913043,
-      "median_throughput_posts_sec": 1906.9450000000002
+      "mean_latency_ms": 297.954347826087,
+      "median_latency_ms": 275.24,
+      "mean_throughput_posts_sec": 3549.4858695652174,
+      "median_throughput_posts_sec": 3633.395
     }
   ]
 }
