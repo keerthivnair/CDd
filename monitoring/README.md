@@ -1,10 +1,10 @@
-# Task 4 — Real DriftLens InfluxDB + Grafana Monitoring Pipeline
+# Task 4 / Person 4: Drift Explainability + Grafana Monitoring Pipeline
 
-This module connects the real output of **Task 3 (DriftLens)** to **InfluxDB 2.7** and **Grafana**, providing real-time time-series storage, deduplication, host performance metric tracking (CPU/memory), and interactive dashboards matching Sections 4.7 & 4.8 of the project proposal.
+This module implements the **Person 4: Drift Explainability + Grafana Dashboard Extension** for the CDd COVID-19 streaming project. It connects real detector results from **DriftLens (Task 3)** and **MCD-DD** to **InfluxDB 2.7** and **Grafana**, provides a **10-panel monitoring dashboard**, and features a full **Drift Explainability Engine** that uncovers why detectors alarmed, highlights semantic shifts, and analyzes detector disagreements.
 
 ---
 
-## 1. Pipeline Architecture
+## 1. End-to-End Pipeline Architecture
 
 ```
 Task 1 (Ingestion):
@@ -13,108 +13,177 @@ Task 1 (Ingestion):
                                          ▼
 Task 2 (Spark Streaming):
   Kafka topic  -->  PySpark event-time windowing  -->  Cleaned JSONL windows
-                                                             │
-                                                             ▼
-Task 3 (DriftLens):
-  Cleaned windows  -->  Sentence Transformer embeddings  -->  DriftLens FDD + Alarm
+                                                              │
+                                                              ▼
+Task 3 (DriftLens & MCD-DD):
+  Cleaned windows  -->  Sentence Transformer embeddings  -->  DriftLens (FDD) & MCD-DD Detectors
                                                                     │
                                     Writes to output/drift/driftlens.jsonl
                                                                     │
                                                                     ▼
-Task 4 (Monitoring Layer):
-  output/drift/driftlens.jsonl  -->  monitoring.ingest (Deduplicates + live CPU/RAM)
-                                              ├──> output/drift_results.csv (Backup)
-                                              └──> InfluxDB 2.7 (cdd-bucket)
-                                                         │
-                                                         ▼
-                                                    Grafana 11+
-                                    "Concept Drift & System Performance Monitoring"
+Task 4 / Person 4 (Monitoring & Explainability):
+  output/drift/driftlens.jsonl  ──> monitoring.ingest (Deduplicates + live CPU/RAM)
+                                            ├──> output/drift_results.csv (Backup CSV)
+                                            └──> InfluxDB 2.7 (cdd-bucket)
+                                                       │
+                                                       ▼
+                                            Grafana 11+ (10 Panels)
+                                            "Concept Drift & System Performance Monitoring"
+
+                                            AND
+
+  output/drift/driftlens.jsonl  ──> monitoring.explain (Drift Explainer Engine)
+                                            ├──> output/drift/disagreement_table.csv
+                                            ├──> output/drift/explainability_report.json
+                                            └──> monitoring/explainability_viewer.html (Interactive Web UI)
 ```
 
 ---
 
-## 2. InfluxDB Measurement & Schema Reference
+## 2. InfluxDB Schema & Measurement Reference
 
 - **Measurement**: `drift_metrics`
 - **Bucket**: `cdd-bucket`
 - **Organization**: `cdd-org`
+- **Retention**: Infinite (`0`) to support historical COVID-19 event timestamps
 
-| Field / Tag | Type | Source | Description |
+### Tags & Fields
+
+| Key | Type | Category | Description |
 |---|---|---|---|
-| `_time` | Timestamp | Task 3 `window_start` | Event timestamp of window start |
-| `window_id` | Tag | Task 3 `window_id` | Unique identifier (e.g. `18402`) |
-| `pipeline` | Tag | `"cdd-stream"` | Pipeline stream identifier |
-| `driftlens_alarm_state` | Tag | `"drift"` \| `"normal"` | Status tag for quick filtering |
-| `driftlens_score` | Field (float) | Task 3 `driftlens_score` | Real Fréchet Drift Distance (FDD) |
-| `driftlens_alarm` | Field (int) | Task 3 `driftlens_alarm` | Binary alarm flag (`0` = normal, `1` = alarm) |
-| `driftlens_threshold` | Field (float) | Task 3 `threshold` | p99 reference calibrated alarm boundary |
-| `processing_latency_ms` | Field (float) | Task 3 timing | Real execution duration (ms) for that window |
-| `throughput_posts_per_sec` | Field (float) | Task 3 / Task 2 | Posts processed per second |
-| `cpu_pct` | Field (float) | Host `psutil` | CPU utilization percentage during window write |
-| `mem_mb` | Field (float) | Host `psutil` | RAM utilization in MB during window write |
-| `post_count` | Field (int) | Task 3 `n_posts` | Total tweets in window |
-| `n_used` | Field (int) | Task 3 `n_used` | Sample size evaluated ($\le 1000$) |
+| `_time` | Timestamp | Timestamp | Window start event timestamp |
+| `window_id` | Tag | Metadata | Unique window identifier (e.g. `18402`) |
+| `pipeline` | Tag | Metadata | Stream identifier (`cdd-stream`) |
+| `agreement` | Tag | Classification | Detector agreement (`both`, `driftlens_only`, `mcddd_only`, `neither`, `reference`) |
+| `driftlens_alarm_state` | Tag | Status | Binary alarm tag (`drift` vs `normal`) |
+| `mcddd_alarm_state` | Tag | Status | Binary MCD-DD alarm tag (`drift` vs `normal`) |
+| `is_reference` | Tag | Baseline | Whether window belongs to reference calibration (`true` vs `false`) |
+| `driftlens_score` | Field (float) | Metric | Fréchet Drift Distance (FDD) score |
+| `driftlens_threshold` | Field (float) | Threshold | Calibrated p99 alarm threshold for DriftLens |
+| `driftlens_alarm` | Field (int) | Alarm | Binary alarm (`1` = alarm, `0` = normal) |
+| `driftlens_ratio` | Field (float) | Normalized | Ratio of score to threshold (`driftlens_score / threshold`) |
+| `mcddd_score` | Field (float) | Metric | Minimum Covariance Determinant drift score |
+| `mcddd_threshold` | Field (float) | Threshold | Calibrated threshold for MCD-DD |
+| `mcddd_alarm` | Field (int) | Alarm | Binary alarm (`1` = alarm, `0` = normal) |
+| `mcddd_ratio` | Field (float) | Normalized | Ratio of score to threshold (`mcddd_score / mcddd_threshold`) |
+| `agreement_code` | Field (int) | Mapping | Integer code for Grafana timeline (`0`: ref, `1`: neither, `2`: dl_only, `3`: mcd_only, `4`: both) |
+| `processing_latency_ms` | Field (float) | Performance | Real processing duration in milliseconds |
+| `throughput_posts_per_sec` | Field (float) | Performance | Posts processed per second |
+| `n_posts` / `post_count` | Field (int) | Volume | Total raw tweets in window |
+| `n_used` | Field (int) | Volume | Number of tweets sampled/evaluated ($\le 1000$) |
+| `cpu_pct` | Field (float) | Host | Host CPU utilization percentage |
+| `mem_mb` | Field (float) | Host | Host RAM consumption in MB |
 
 ---
 
-## 3. Grafana Dashboard Panels
+## 3. Grafana 10-Panel Dashboard
 
-Access dashboard at `http://localhost:3000` (Direct Admin access enabled; no login/password required):
-1. **DriftLens Score vs Time**: Plots `driftlens_score` vs `driftlens_threshold`.
-2. **Drift Alarms**: Visual state timeline (`NORMAL` vs `DRIFT ALARM`).
-3. **Processing Latency**: Window execution latency in ms.
-4. **Throughput**: Posts processed per second.
-5. **CPU Usage**: Real host CPU % utilization.
-6. **Memory Usage**: Real host RAM consumption in MB.
+The dashboard is auto-provisioned at `http://localhost:3000` (Direct Admin access enabled, no password required) and organized into three structured sections:
+
+### Section 1: Concept Drift Detectors & Alarm Analysis
+- **Panel 1: DriftLens Score vs Time**: Timeseries plotting `driftlens_score` against dashed `driftlens_threshold`.
+- **Panel 2: MCD-DD Score vs Time**: Independent timeseries plotting `mcddd_score` against dashed `mcddd_threshold` on its native metric scale.
+- **Panel 3: Detector Agreement & Alarm States**: State timeline visualizing `agreement_code`, `driftlens_alarm`, and `mcddd_alarm` with clear color coding.
+- **Panel 4: Drift Alarm Investigation & Disagreement Table**: Interactive table pivoting window records with scores, normalized ratios, and color-coded agreement tags for operator triage.
+
+### Section 2: Tweet Stream Characteristics & Explainability
+- **Panel 5: Tweet Volume (Total vs Used Posts)**: Timeseries comparing total ingested window posts (`n_posts`) vs sampled posts (`n_used`).
+- **Panel 10: Drift Explainability & Semantic Shift Portal**: Rich markdown documentation summarizing consensus findings, key regime shifts, and portal launch instructions.
+
+### Section 3: System Performance & Resource Metrics
+- **Panel 6: Processing Latency**: Real window computation duration in ms.
+- **Panel 7: Processing Throughput**: Execution throughput in posts/sec.
+- **Panel 8: CPU Utilization**: Host CPU load % with alert thresholds.
+- **Panel 9: Memory Utilization**: Host memory consumption in MB.
 
 ---
 
-## 4. End-to-End Execution Guide (Terminal by Terminal)
+## 4. Drift Explainability Engine & Standalone Web Viewer
+
+Whenever concept drift occurs, operators must understand **what actually changed**. The explainability engine (`monitoring/explain.py`) performs:
+
+1. **Disagreement Prioritization**: Isolates cases where detectors diverge (e.g. `mcddd_only` in early May 2020 vs `driftlens_only` gradual trends).
+2. **Semantic Theme & Keyword Shift Analysis**: Evaluates TF-IDF n-gram frequency growth and drops to identify *emerging* (newly surging) and *fading* (cooling) terms.
+3. **Representative Tweet Extraction**: Computes cosine distance to window embedding centroids to pick 3 representative tweets instead of overwhelming operators with raw tweet streams.
+4. **Missing Data Honesty**: If raw tweets (`windows_all.jsonl`) are not present locally, the system logs an explicit notice without fabricating fictional tweets, and uses verified historical traces in the companion UI.
+
+### Launching the Standalone Explainability Viewer
+
+```bash
+# From repository root:
+python3 -m http.server 5050
+```
+
+Open in your browser:
+**`http://localhost:5050/monitoring/explainability_viewer.html`**
+
+The viewer provides:
+- KPI summary cards (Total Windows, Both Alarms, Disagreements)
+- Before vs After comparison cards for key drift windows
+- Emerging & Fading keyword tag clouds
+- Searchable, filterable disagreement table with direct inspection links
+
+---
+
+## 5. End-to-End Terminal Execution Guide
 
 Run each command from the repository root (`/Users/satheeshkumar/Documents/GitHub/CDd`):
 
-### Terminal 1 — InfluxDB
+### Terminal 1 — InfluxDB Service
 ```bash
 docker compose up influxdb
 ```
-*(Runs InfluxDB 2.7 on port 8086 with infinite retention for historical COVID data)*
+*(Runs InfluxDB 2.7 on port 8086 with infinite retention)*
 
-### Terminal 2 — Grafana
+### Terminal 2 — Grafana Dashboard
 ```bash
 docker compose up grafana
 ```
-*(Runs Grafana on port 3000 with pre-provisioned datasource & pre-loaded dashboard)*
+*(Runs Grafana on port 3000 with pre-provisioned datasource & 10-panel dashboard)*
 
-### Terminal 3 — Kafka / Task 1 (Data Ingestion)
+### Terminal 3 — Kafka Data Ingestion (Task 1)
 ```bash
 python ingestion/main.py --config ingestion/config.yaml --no-delay
 ```
-*(Publishes COVID-19 tweets chronologically into Kafka topic `social-media-stream`)*
 
-### Terminal 4 — Spark / Task 2 (Streaming & Windowing)
+### Terminal 4 — Spark Windowing (Task 2)
 ```bash
 python spark/spark_stream.py --config spark/config.yaml
 ```
-*(Consumes Kafka, cleans text, groups into daily windows in `output/windows`)*
 
-### Terminal 5 — DriftLens / Task 3 (Embeddings & Drift Detection)
+### Terminal 5 — Drift Detection (Task 3)
 ```bash
 python drift/run_drift.py --config drift/config.yaml --follow
 ```
-*(Embeds windows, calibrates reference, calculates FDD score/alarm, and outputs to `output/drift/driftlens.jsonl`)*
 
-### Terminal 6 — Task 4 (InfluxDB Ingestion)
+### Terminal 6 — Task 4 InfluxDB Ingestion
 ```bash
-python -m monitoring.ingest
+python -m monitoring.ingest --source output/drift/driftlens.jsonl
 ```
-*(Tails `output/drift/driftlens.jsonl`, attaches live system metrics, deduplicates, and ingests points into InfluxDB)*
+*(Reads detector results, computes agreement tags and ratios, and writes to InfluxDB + CSV)*
+
+### Terminal 7 — Explainability Engine & Web Viewer
+```bash
+python monitoring/explain.py
+python3 -m http.server 5050
+```
+*(Generates `explainability_report.json` and `disagreement_table.csv`, then serves `explainability_viewer.html`)*
 
 ---
 
-## 5. Verification & Testing
+## 6. Unit & Integration Testing
 
-Run unit tests (no external dependencies required):
+Run the test suite using Python's standard `unittest`:
 ```bash
 python monitoring/tests.py
 ```
-*(Tests schema validation against real Task 3 output, Line Protocol conversion, deduplication, and CSV backup)*
+
+Covers:
+- Real Task 3 dictionary parsing
+- All 5 agreement classification branches
+- MCD-DD score and threshold ratio validation
+- Line protocol serialization with agreement tags
+- InfluxDB deduplication protection
+- TF-IDF emerging/fading keyword extraction
+- Important window selection
+- Honest missing raw tweet handling

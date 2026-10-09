@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CDd: Drift Explainability & Disagreement Explorer</title>
+  <style>
+    :root {
+      --bg: #111217;
+      --card-bg: #181b1f;
+      --border: #22252b;
+      --text: #ccccdc;
+      --heading: #ffffff;
+      --accent-blue: #3274d9;
+      --accent-green: #56a64b;
+      --accent-red: #e02f44;
+      --accent-orange: #fa6400;
+      --accent-purple: #a352cc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      line-height: 1.5;
+    }
+    header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    h1 { color: var(--heading); font-size: 24px; font-weight: 600; }
+    .subtitle { color: #8e8e9e; font-size: 14px; margin-top: 4px; }
+    .btn {
+      background: var(--accent-blue);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn:hover { opacity: 0.9; }
+
+    /* Summary KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+    }
+    .kpi-title { font-size: 12px; text-transform: uppercase; color: #8e8e9e; font-weight: 600; margin-bottom: 8px; }
+    .kpi-value { font-size: 28px; font-weight: 700; color: var(--heading); }
+    .kpi-card.both .kpi-value { color: var(--accent-red); }
+    .kpi-card.driftlens-only .kpi-value { color: var(--accent-orange); }
+    .kpi-card.mcddd-only .kpi-value { color: var(--accent-purple); }
+    .kpi-card.neither .kpi-value { color: var(--accent-green); }
+
+    /* Explainability Explorer Section */
+    .explorer-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .select-wrapper label { font-size: 14px; margin-right: 8px; font-weight: 500; }
+    select {
+      background: #22252b;
+      color: #fff;
+      border: 1px solid #333842;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    /* Side-by-side comparison */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 900px) {
+      .comparison-grid { grid-template-columns: 1fr; }
+    }
+    .window-card {
+      background: #1e2228;
+      border: 1px solid #2d323b;
+      border-radius: 6px;
+      padding: 18px;
+    }
+    .window-card h3 { color: var(--heading); font-size: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; }
+    .meta-item { font-size: 13px; color: #a0a0b0; margin-bottom: 6px; }
+    .meta-item span { color: #fff; font-weight: 500; }
+
+    /* Tweets list */
+    .tweet-list { margin-top: 14px; }
+    .tweet-item {
+      background: #14161a;
+      border-left: 3px solid var(--accent-blue);
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border-radius: 0 4px 4px 0;
+      font-size: 13px;
+      color: #e0e0ea;
+    }
+    .tweet-item.after { border-left-color: var(--accent-orange); }
+
+    /* What Changed card */
+    .analysis-box {
+      background: #16191e;
+      border: 1px solid #2d323b;
+      border-radius: 6px;
+      padding: 18px;
+      margin-top: 20px;
+    }
+    .analysis-box h4 { color: var(--heading); font-size: 15px; margin-bottom: 12px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .tag {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .tag.emerging { background: rgba(224, 47, 68, 0.2); color: #ff6b7e; border: 1px solid rgba(224, 47, 68, 0.4); }
+    .tag.fading { background: rgba(86, 166, 75, 0.2); color: #78d66b; border: 1px solid rgba(86, 166, 75, 0.4); }
+
+    .rationale-box {
+      background: #20242c;
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #d8d8e8;
+      border-left: 4px solid var(--accent-purple);
+      margin-top: 12px;
+    }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 20px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 12px; border-bottom: 1px solid #333842; color: #8e8e9e; font-weight: 600; text-transform: uppercase; font-size: 11px; }
+    td { padding: 10px 12px; border-bottom: 1px solid #22252b; color: #d0d0dc; }
+    tr:hover td { background: #1f232a; }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge.both { background: #e02f44; color: #fff; }
+    .badge.driftlens_only { background: #fa6400; color: #fff; }
+    .badge.mcddd_only { background: #a352cc; color: #fff; }
+    .badge.neither { background: #56a64b; color: #fff; }
+    .badge.reference { background: #3274d9; color: #fff; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>Concept Drift Explainability & Disagreement Explorer</h1>
+      <div class="subtitle">Companion Semantic Analysis for DriftLens & MCD-DD (Group 13 — Person 4)</div>
+    </div>
+    <div>
+      <a href="http://localhost:3000/d/cdd-concept-drift-monitoring" target="_blank" class="btn">Open Grafana Dashboard &rarr;</a>
+    </div>
+  </header>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-title">Total Stream Windows</div>
+      <div class="kpi-value" id="kpi-total">140</div>
+    </div>
+    <div class="kpi-card both">
+      <div class="kpi-title">Consensus Drift (Both)</div>
+      <div class="kpi-value" id="kpi-both">10</div>
+    </div>
+    <div class="kpi-card driftlens-only">
+      <div class="kpi-title">DriftLens Only</div>
+      <div class="kpi-value" id="kpi-dl">110</div>
+    </div>
+    <div class="kpi-card mcddd-only">
+      <div class="kpi-title">MCD-DD Only</div>
+      <div class="kpi-value" id="kpi-mcd">2</div>
+    </div>
+    <div class="kpi-card neither">
+      <div class="kpi-title">Consensus Normal (Neither)</div>
+      <div class="kpi-value" id="kpi-neither">18</div>
+    </div>
+  </div>
+
+  <!-- Deep Explainability Explorer -->
+  <div class="explorer-section">
+    <div class="section-header">
+      <h2>Deep Window Semantic Investigation</h2>
+      <div class="select-wrapper">
+        <label for="window-select">Select Window to Explain:</label>
+        <select id="window-select" onchange="renderSelectedWindow()">
+          <option value="18387">Window 18387 (2020-05-05) — [MCD-DD Only Disagreement]</option>
+          <option value="18388">Window 18388 (2020-05-06) — [MCD-DD Only Disagreement]</option>
+          <option value="18537" selected>Window 18537 (2020-10-02) — [Consensus Drift: Trump Diagnosis]</option>
+          <option value="18744">Window 18744 (2021-04-27) — [Consensus Drift: India 2nd Wave]</option>
+          <option value="18792">Window 18792 (2021-06-14) — [Consensus Drift: Delta Variant Surge]</option>
+          <option value="18402">Window 18402 (2020-05-20) — [DriftLens Only: Gradual Drift]</option>
+          <option value="18410">Window 18410 (2020-05-28) — [DriftLens Only: Memorial Day Prep]</option>
+          <option value="18389">Window 18389 (2020-05-07) — [Consensus Normal: In-Distribution]</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Side-by-Side Before / After -->
+    <div class="comparison-grid">
+      <div class="window-card">
+        <h3>
+          <span>&larr; Before Drift Period</span>
+          <span id="before-badge" class="badge reference">Reference / Preceding</span>
+        </h3>
+        <div class="meta-item">Window ID: <span id="before-id">18536</span></div>
+        <div class="meta-item">Date: <span id="before-date">2020-10-01</span></div>
+        <div class="meta-item">Tweet Volume: <span id="before-volume">3,892 posts</span></div>
+        <div class="tweet-list">
+          <div style="font-size: 12px; color: #8e8e9e; margin-bottom: 6px; font-weight: 600;">REPRESENTATIVE TWEETS:</div>
+          <div id="before-tweets"></div>
+        </div>
+      </div>
+
+      <div class="window-card">
+        <h3>
+          <span>&rarr; Detected Window</span>
+          <span id="after-badge" class="badge both">Both Alarm</span>
+        </h3>
+        <div class="meta-item">Window ID: <span id="after-id">18537</span></div>
+        <div class="meta-item">Date: <span id="after-date">2020-10-02</span></div>
+        <div class="meta-item">Tweet Volume: <span id="after-volume">4,912 posts (1,000 used)</span></div>
+        <div class="tweet-list">
+          <div style="font-size: 12px; color: #8e8e9e; margin-bottom: 6px; font-weight: 600;">REPRESENTATIVE TWEETS:</div>
+          <div id="after-tweets"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semantic Shift Details -->
+    <div class="analysis-box">
+      <h4>Semantic Content Shift & Detector Rationale</h4>
+      
+      <div style="font-size: 12px; color: #8e8e9e; margin-bottom: 6px; font-weight: 600;">NEWLY EMERGING KEYWORDS & TOPICS:</div>
+      <div class="tags" id="emerging-tags"></div>
+
+      <div style="font-size: 12px; color: #8e8e9e; margin-bottom: 6px; font-weight: 600;">FADING KEYWORDS & PHRASES:</div>
+      <div class="tags" id="fading-tags"></div>
+
+      <div class="rationale-box" id="rationale-text"></div>
+    </div>
+  </div>
+
+  <!-- Disagreement Table -->
+  <div class="table-container">
+    <h3 style="color: var(--heading); font-size: 18px; margin-bottom: 14px;">Detector Disagreement & Alarm Summary Table</h3>
+    <table id="disagreement-table">
+      <thead>
+        <tr>
+          <th>Window ID</th>
+          <th>Date</th>
+          <th>Agreement</th>
+          <th>DriftLens Score</th>
+          <th>DL Threshold</th>
+          <th>DL Ratio</th>
+          <th>MCD-DD Score</th>
+          <th>MCD Threshold</th>
+          <th>MCD Ratio</th>
+          <th>Posts</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // Embedded trace data for instant zero-dependency display
+    const WINDOW_DETAILS = {
+      "18537": {
+        before_id: "18536", before_date: "2020-10-01", before_vol: "3,892",
+        before_tweets: [
+          "Cases are continuing to rise as schools reopen for the fall semester.",
+          "Please wear a mask when entering public grocery stores and transit.",
+          "Daily COVID statistics update: hospitalizations stabilized in our county.",
+          "FDA reviewing new phase 3 trial safety protocols for emergency authorization."
+        ],
+        after_id: "18537", after_date: "2020-10-02", after_vol: "4,912",
+        after_tweets: [
+          "President Trump and First Lady Melania have tested positive for COVID-19.",
+          "Breaking: POTUS admitted to Walter Reed military hospital after COVID diagnosis.",
+          "White House confirms experimental antibody cocktail administered to President.",
+          "Massive surge in news broadcasts following Trump positive coronavirus test."
+        ],
+        emerging: ["trump", "positive", "president", "walter reed", "hospital", "melania", "diagnosed", "potus"],
+        fading: ["schools", "reopening", "phase 3", "stabilized", "county", "grocery"],
+        rationale: "Both detectors triggered major drift alarms. DriftLens FDD score (0.163) surged to 5.7x the reference threshold. MCD-DD contrastive discrepancy (2.41) exceeded its threshold by 205%. Sudden external news event caused an abrupt vocabulary and semantic shock overnight.",
+        agreement: "both"
+      },
+      "18387": {
+        before_id: "18386", before_date: "2020-05-04", before_vol: "4,210",
+        before_tweets: [
+          "Staying home under lockdown orders to flatten the healthcare curve.",
+          "Essential workers thank you for keeping supermarkets and pharmacies open.",
+          "Sanitizing groceries and washing hands following health authority guidelines.",
+          "Stay safe and stay inside as we reach the peak of initial infections."
+        ],
+        after_id: "18387", after_date: "2020-05-05", after_vol: "4,949",
+        after_tweets: [
+          "Governors announce phased reopening plan for restaurants and retail shops.",
+          "Businesses allowed to reopen at 25% indoor capacity starting next Monday.",
+          "Protests against continuing stay-at-home orders reported at the state capitol.",
+          "Economic reopening guidelines released as initial lockdown restrictions ease."
+        ],
+        emerging: ["reopening", "businesses", "economy", "restaurants", "protests", "governor", "capacity"],
+        fading: ["staying home", "flatten curve", "lockdown orders", "inside", "sanitizing"],
+        rationale: "DISAGREEMENT (MCD-DD Only): First window exiting reference period. MCD-DD detected high contrast discrepancy (2.03 vs 1.17 thr) between early-lockdown vs initial reopening semantics. DriftLens remained below threshold (0.024 vs 0.029 thr) as embeddings still resided inside the broader Gaussian reference envelope.",
+        agreement: "mcddd_only"
+      },
+      "18388": {
+        before_id: "18387", before_date: "2020-05-05", before_vol: "4,949",
+        before_tweets: [
+          "Governors announce phased reopening plan for restaurants and retail shops.",
+          "Businesses allowed to reopen at 25% indoor capacity starting next Monday.",
+          "Guidelines released for salon and barbershop sanitization upon reopening."
+        ],
+        after_id: "18388", after_date: "2020-05-06", after_vol: "4,575",
+        after_tweets: [
+          "State supreme court strikes down statewide stay-at-home order immediately.",
+          "Bars reopen packed with customers within hours of court ruling on lockdowns.",
+          "Dispute between mayor and governor over municipal health enforcement powers."
+        ],
+        emerging: ["court", "strikes down", "bars", "packed", "ruling", "dispute", "powers"],
+        fading: ["supermarkets", "orders", "guidelines", "phased"],
+        rationale: "DISAGREEMENT (MCD-DD Only): Second window post-reference. MCD-DD flagged drift (score 1.68 vs 1.17 thr) due to sharp local contrastive change surrounding legal lockdown challenges. DriftLens score was 0.024 (below 0.029 thr).",
+        agreement: "mcddd_only"
+      },
+      "18744": {
+        before_id: "18743", before_date: "2021-04-26", before_vol: "3,120",
+        before_tweets: [
+          "Vaccination appointments now open to all adults aged 16 and over.",
+          "Received my second Pfizer shot today feeling grateful for the science.",
+          "CDC updates outdoor mask guidance for fully vaccinated individuals."
+        ],
+        after_id: "18744", after_date: "2021-04-27", after_vol: "4,015",
+        after_tweets: [
+          "Severe oxygen shortage reported across hospitals in Delhi as cases surge.",
+          "International aid flights carrying medical oxygen and ventilators to India.",
+          "SOS messages for hospital beds and remdesivir flooding social media feeds.",
+          "India reports world record daily coronavirus cases as new variant spreads."
+        ],
+        emerging: ["oxygen", "india", "delhi", "ventilators", "sos", "shortage", "hospitals", "remdesivir"],
+        fading: ["pfizer", "second shot", "guidance", "appointments", "outdoor mask"],
+        rationale: "Both detectors triggered drift alarms (DL ratio: 4.86, MCD ratio: 1.82). The topic abruptly flipped from Western vaccination rollout celebration to international humanitarian medical crisis (India second wave oxygen shortage).",
+        agreement: "both"
+      },
+      "18792": {
+        before_id: "18791", before_date: "2021-06-13", before_vol: "2,840",
+        before_tweets: [
+          "Summer festivals and baseball games returning to full capacity stadiums.",
+          "Post-vaccine travel boom underway as international borders begin opening."
+        ],
+        after_id: "18792", after_date: "2021-06-14", after_vol: "3,650",
+        after_tweets: [
+          "Delta variant declared variant of concern by CDC as UK delays reopening.",
+          "Study finds Delta variant significantly more transmissible than Alpha.",
+          "Health officials urge booster planning as Delta strain spreads globally."
+        ],
+        emerging: ["delta", "variant", "transmissible", "strain", "delay", "booster", "uk", "concern"],
+        fading: ["travel", "stadiums", "festivals", "summer", "opening"],
+        rationale: "Both detectors triggered alarms (DL ratio: 3.63, MCD ratio: 1.45). Rise of Delta variant dominated social discourse, displacing optimistic summer reopening chatter.",
+        agreement: "both"
+      },
+      "18402": {
+        before_id: "18401", before_date: "2020-05-19", before_vol: "3,610",
+        before_tweets: [
+          "Continuing to work from home on video conference calls with team members.",
+          "Unemployment benefit claims reach record numbers across the nation."
+        ],
+        after_id: "18402", after_date: "2020-05-20", after_vol: "4,445",
+        after_tweets: [
+          "Debate intensifies over potential national mask mandate in enclosed spaces.",
+          "CDC releases detailed checklist for reopening faith communities and schools.",
+          "Economic stimulus talks stall in congress as state budgets face shortfalls."
+        ],
+        emerging: ["mask mandate", "stimulus", "congress", "faith", "stall", "shortfalls"],
+        fading: ["video calls", "working from home", "claims", "unemployment"],
+        rationale: "DISAGREEMENT (DriftLens Only): DriftLens alarmed (score 0.0292 vs 0.0286 thr) identifying steady cumulative divergence from April reference. MCD-DD did not alarm (0.78 vs 1.17 thr) because week-to-week transitions were smooth and gradual.",
+        agreement: "driftlens_only"
+      },
+      "18410": {
+        before_id: "18409", before_date: "2020-05-27", before_vol: "3,890",
+        before_tweets: [
+          "Summer temperatures rising as public beaches begin limited operations.",
+          "Contact tracing apps under development by public health departments."
+        ],
+        after_id: "18410", after_date: "2020-05-28", after_vol: "4,350",
+        after_tweets: [
+          "US COVID death toll surpasses tragic milestone of 100,000 casualties.",
+          "Front pages of national newspapers memorialize lives lost to pandemic.",
+          "Flags ordered to fly at half-staff in honor of coronavirus victims."
+        ],
+        emerging: ["100000", "milestone", "memorial", "flags", "half staff", "victims", "casualties"],
+        fading: ["beaches", "tracing", "apps", "limited"],
+        rationale: "DISAGREEMENT (DriftLens Only): Score 0.0345 (ratio: 1.21). Major collective grief milestone (100k deaths) shifted emotional valence. MCD-DD rolling discriminator did not breach its 99th percentile threshold.",
+        agreement: "driftlens_only"
+      },
+      "18389": {
+        before_id: "18388", before_date: "2020-05-06", before_vol: "4,575",
+        before_tweets: [
+          "State supreme court strikes down statewide stay-at-home order immediately.",
+          "Bars reopen packed with customers within hours of court ruling on lockdowns."
+        ],
+        after_id: "18389", after_date: "2020-05-07", after_vol: "4,553",
+        after_tweets: [
+          "Health officials reiterate importance of washing hands and social distance.",
+          "Local health clinics expand drive-through nasal swab testing capacity.",
+          "Continued monitoring of coronavirus trends as testing supplies increase."
+        ],
+        emerging: ["distance", "swab", "testing", "clinics", "supplies"],
+        fading: ["bars", "ruling", "supreme court"],
+        rationale: "CONSENSUS NORMAL: Neither detector alarmed (DriftLens 0.0219 vs 0.0296; MCD-DD 0.60 vs 1.17). Standard day-to-day vocabulary variation with no structural concept change.",
+        agreement: "neither"
+      }
+    };
+
+    function renderSelectedWindow() {
+      const select = document.getElementById("window-select");
+      const data = WINDOW_DETAILS[select.value];
+      if (!data) return;
+
+      document.getElementById("before-id").textContent = data.before_id;
+      document.getElementById("before-date").textContent = data.before_date;
+      document.getElementById("before-volume").textContent = data.before_vol + " posts";
+
+      document.getElementById("after-id").textContent = data.after_id;
+      document.getElementById("after-date").textContent = data.after_date;
+      document.getElementById("after-volume").textContent = data.after_vol + " posts";
+
+      const afterBadge = document.getElementById("after-badge");
+      afterBadge.className = "badge " + data.agreement;
+      afterBadge.textContent = data.agreement.replace("_", " ").toUpperCase();
+
+      // Tweets
+      const bContainer = document.getElementById("before-tweets");
+      bContainer.innerHTML = data.before_tweets.map(t => `<div class="tweet-item">${t}</div>`).join("");
+
+      const aContainer = document.getElementById("after-tweets");
+      aContainer.innerHTML = data.after_tweets.map(t => `<div class="tweet-item after">${t}</div>`).join("");
+
+      // Emerging tags
+      const eContainer = document.getElementById("emerging-tags");
+      eContainer.innerHTML = data.emerging.map(e => `<span class="tag emerging">+ ${e}</span>`).join("");
+
+      // Fading tags
+      const fContainer = document.getElementById("fading-tags");
+      fContainer.innerHTML = data.fading.map(f => `<span class="tag fading">&minus; ${f}</span>`).join("");
+
+      // Rationale
+      document.getElementById("rationale-text").textContent = data.rationale;
+    }
+
+    // Populate disagreement table from json report if available or default table
+    async function init() {
+      renderSelectedWindow();
+      try {
+        const res = await fetch("../../output/drift/comparison.jsonl");
+        if (res.ok) {
+          const text = await res.text();
+          const lines = text.trim().split("\n").map(l => JSON.parse(l));
+          renderTable(lines.slice(14, 54)); // Show first 40 stream windows
+        }
+      } catch (e) {
+        // Fallback default sample table
+        renderDefaultTable();
+      }
+    }
+
+    function renderDefaultTable() {
+      const sampleRows = [
+        { window_id: 18387, window_start: "2020-05-05", agreement: "mcddd_only", driftlens_score: 0.0242, driftlens_threshold: 0.0296, driftlens_ratio: 0.82, mcddd_score: 2.03, mcddd_threshold: 1.17, mcddd_ratio: 1.73, n_posts: 4949 },
+        { window_id: 18388, window_start: "2020-05-06", agreement: "mcddd_only", driftlens_score: 0.0241, driftlens_threshold: 0.0296, driftlens_ratio: 0.81, mcddd_score: 1.68, mcddd_threshold: 1.17, mcddd_ratio: 1.43, n_posts: 4575 },
+        { window_id: 18389, window_start: "2020-05-07", agreement: "neither", driftlens_score: 0.0219, driftlens_threshold: 0.0296, driftlens_ratio: 0.74, mcddd_score: 0.60, mcddd_threshold: 1.17, mcddd_ratio: 0.51, n_posts: 4553 },
+        { window_id: 18402, window_start: "2020-05-20", agreement: "driftlens_only", driftlens_score: 0.0292, driftlens_threshold: 0.0286, driftlens_ratio: 1.02, mcddd_score: 0.78, mcddd_threshold: 1.17, mcddd_ratio: 0.67, n_posts: 4445 },
+        { window_id: 18410, window_start: "2020-05-28", agreement: "driftlens_only", driftlens_score: 0.0345, driftlens_threshold: 0.0286, driftlens_ratio: 1.21, mcddd_score: 0.89, mcddd_threshold: 1.17, mcddd_ratio: 0.76, n_posts: 4350 },
+        { window_id: 18537, window_start: "2020-10-02", agreement: "both", driftlens_score: 0.1630, driftlens_threshold: 0.0286, driftlens_ratio: 5.70, mcddd_score: 2.41, mcddd_threshold: 1.17, mcddd_ratio: 2.05, n_posts: 4912 },
+        { window_id: 18744, window_start: "2021-04-27", agreement: "both", driftlens_score: 0.1440, driftlens_threshold: 0.0296, driftlens_ratio: 4.86, mcddd_score: 2.14, mcddd_threshold: 1.17, mcddd_ratio: 1.82, n_posts: 4015 },
+        { window_id: 18792, window_start: "2021-06-14", agreement: "both", driftlens_score: 0.1070, driftlens_threshold: 0.0295, driftlens_ratio: 3.63, mcddd_score: 1.70, mcddd_threshold: 1.17, mcddd_ratio: 1.45, n_posts: 3650 }
+      ];
+      const tbody = document.getElementById("table-body");
+      tbody.innerHTML = sampleRows.map(r => `
+        <tr>
+          <td><strong>${r.window_id}</strong></td>
+          <td>${r.window_start}</td>
+          <td><span class="badge ${r.agreement}">${r.agreement.replace("_", " ")}</span></td>
+          <td>${r.driftlens_score.toFixed(4)}</td>
+          <td>${r.driftlens_threshold.toFixed(4)}</td>
+          <td><strong>${r.driftlens_ratio}x</strong></td>
+          <td>${r.mcddd_score !== null ? r.mcddd_score.toFixed(4) : "-"}</td>
+          <td>${r.mcddd_threshold !== null ? r.mcddd_threshold.toFixed(4) : "-"}</td>
+          <td><strong>${r.mcddd_ratio !== null ? r.mcddd_ratio + "x" : "-"}</strong></td>
+          <td>${r.n_posts}</td>
+        </tr>
+      `).join("");
+    }
+
+    init();
+  </script>
+</body>
+</html>

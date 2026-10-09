@@ -1,6 +1,6 @@
 """
 InfluxDB Client and Dual Logger (InfluxDB + CSV) for Task 4.
-Consumes real Task 3 (DriftLens) outputs and system resource metrics.
+Consumes real detector outputs (DriftLens + MCD-DD) and system resource metrics.
 Supports direct HTTP writes (via requests/urllib) as well as official influxdb-client.
 """
 
@@ -22,14 +22,14 @@ if not logger.handlers:
 
 class DriftMetricsLogger:
     """
-    Handles logging of real Task 3 drift results to InfluxDB and CSV.
+    Handles logging of real drift results to InfluxDB and CSV.
     Strictly satisfies Section 4.7 & 4.12 of the CDd proposal.
     """
 
     def __init__(self, config: Optional[Union[Dict[str, Any], str, Path]] = None):
         self.config = self._load_config(config)
         self._seen_windows: Set[str] = set()
-        
+
         self.influx_enabled = self.config.get("logging", {}).get("log_to_influx", True)
         self.csv_enabled = self.config.get("logging", {}).get("log_to_csv", True)
         self.csv_path = Path(self.config.get("logging", {}).get("csv_path", "output/drift_results.csv"))
@@ -78,40 +78,28 @@ class DriftMetricsLogger:
             if not self.csv_path.exists() or self.csv_path.stat().st_size == 0:
                 with open(self.csv_path, "w", newline="", encoding="utf-8") as f:
                     writer = csv.DictWriter(f, fieldnames=[
-                        "timestamp", "window_id", "driftlens_score", "driftlens_alarm",
-                        "driftlens_threshold", "mcddd_score", "mcddd_alarm",
-                        "processing_latency_ms", "throughput_posts_per_sec",
-                        "cpu_pct", "mem_mb", "post_count", "n_used", "is_reference", "pipeline"
+                        "timestamp", "window_id", "driftlens_score", "driftlens_threshold", "driftlens_alarm",
+                        "driftlens_ratio", "mcddd_score", "mcddd_threshold", "mcddd_alarm", "mcddd_ratio",
+                        "agreement", "processing_latency_ms", "throughput_posts_per_sec",
+                        "cpu_pct", "mem_mb", "n_posts", "n_used", "is_reference", "pipeline"
                     ])
                     writer.writeheader()
             logger.info("CSV backup initialized at %s", self.csv_path.resolve())
         except Exception as e:
             logger.error("Failed to initialize CSV logger at %s: %s", self.csv_path, e)
 
-    def log_drift_result(self, task3_result: Dict[str, Any]) -> bool:
+    def log_drift_result(self, detector_result: Dict[str, Any], deduplicate: bool = True) -> bool:
         """
-        Consumes a real Task 3 output dictionary:
-        {
-            "window_id": 18402,
-            "window_start": "2020-05-20T00:00:00",
-            "driftlens_score": 0.029159,
-            "driftlens_alarm": true,
-            "threshold": 0.028602,
-            "n_posts": 1445,
-            "n_used": 1000,
-            "is_reference": false,
-            "processing_latency_ms": 234.5,
-            "throughput_posts_per_sec": 616.2
-        }
+        Consumes a real detector output dictionary from driftlens.jsonl.
         Validates, collects live host system metrics, deduplicates, and writes to InfluxDB and CSV.
         """
-        record = WindowDriftResult.from_task3_dict(task3_result)
-        return self.log_window(record)
+        record = WindowDriftResult.from_task3_dict(detector_result)
+        return self.log_window(record, deduplicate=deduplicate)
 
     def log_window(self, result: WindowDriftResult, deduplicate: bool = True) -> bool:
         """
         Logs a single WindowDriftResult to InfluxDB and CSV.
-        Avoids double-inserting if window_id was already processed.
+        Avoids double-inserting if window_id was already processed in this session.
         """
         w_key = str(result.window_id)
         if deduplicate and w_key in self._seen_windows:
@@ -134,8 +122,11 @@ class DriftMetricsLogger:
             try:
                 resp = self._session.post(endpoint, data=line_protocol.encode("utf-8"), timeout=self.timeout)
                 if resp.status_code in (200, 204):
-                    logger.info("Window %s written to InfluxDB (score: %.6f, thr: %s, alarm: %s)",
-                                result.window_id, result.driftlens_score, result.driftlens_threshold, result.driftlens_alarm)
+                    logger.info("Window %s written to InfluxDB (DL: %.4f/%.4f, MCD: %s/%s, agree: %s)",
+                                result.window_id, result.driftlens_score, result.driftlens_threshold or 0,
+                                f"{result.mcddd_score:.4f}" if result.mcddd_score is not None else "-",
+                                f"{result.mcddd_threshold:.4f}" if result.mcddd_threshold is not None else "-",
+                                result.agreement)
                 else:
                     logger.error("InfluxDB rejected write for window %s [HTTP %s]: %s",
                                  result.window_id, resp.status_code, resp.text)
@@ -149,10 +140,10 @@ class DriftMetricsLogger:
             try:
                 with open(self.csv_path, "a", newline="", encoding="utf-8") as f:
                     writer = csv.DictWriter(f, fieldnames=[
-                        "timestamp", "window_id", "driftlens_score", "driftlens_alarm",
-                        "driftlens_threshold", "mcddd_score", "mcddd_alarm",
-                        "processing_latency_ms", "throughput_posts_per_sec",
-                        "cpu_pct", "mem_mb", "post_count", "n_used", "is_reference", "pipeline"
+                        "timestamp", "window_id", "driftlens_score", "driftlens_threshold", "driftlens_alarm",
+                        "driftlens_ratio", "mcddd_score", "mcddd_threshold", "mcddd_alarm", "mcddd_ratio",
+                        "agreement", "processing_latency_ms", "throughput_posts_per_sec",
+                        "cpu_pct", "mem_mb", "n_posts", "n_used", "is_reference", "pipeline"
                     ])
                     writer.writerow(result.to_flat_dict())
             except Exception as e:

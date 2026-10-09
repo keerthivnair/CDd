@@ -5,6 +5,7 @@ output/**
 !output/**/
 !output/drift/*.jsonl
 !output/drift/*.json
+!output/drift/*.csv
 !output/experiments/*/*.jsonl
 !output/experiments/*/*.json
 windows_full_backup/

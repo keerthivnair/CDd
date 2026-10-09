@@ -30,7 +30,7 @@
         "y": 0
       },
       "id": 100,
-      "title": "Drift Detection Metrics (DriftLens & MCD-DD)",
+      "title": "Concept Drift Detectors & Alarm Analysis",
       "type": "row"
     },
     {
@@ -38,7 +38,7 @@
         "type": "influxdb",
         "uid": "InfluxDB_Flux"
       },
-      "description": "Fréchet Drift Distance (FDD) score calculated per event-time window against baseline reference.",
+      "description": "Fréchet Drift Distance (FDD) score calculated per window against baseline reference distribution.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -48,7 +48,7 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "Drift Score (FDD / MCD)",
+            "axisLabel": "DriftLens Score (FDD)",
             "axisPlacement": "auto",
             "fillOpacity": 15,
             "gradientMode": "opacity",
@@ -86,26 +86,7 @@
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "super-light-blue",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "mcddd_score"
-            },
-            "properties": [
-              {
-                "id": "displayName",
-                "value": "MCD-DD Score"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "purple",
+                  "fixedColor": "#3274D9",
                   "mode": "fixed"
                 }
               }
@@ -119,7 +100,7 @@
             "properties": [
               {
                 "id": "displayName",
-                "value": "Alarm Threshold"
+                "value": "DriftLens Alarm Threshold"
               },
               {
                 "id": "custom.lineStyle",
@@ -131,7 +112,7 @@
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "red",
+                  "fixedColor": "#E02F44",
                   "mode": "fixed"
                 }
               }
@@ -140,8 +121,8 @@
         ]
       },
       "gridPos": {
-        "h": 9,
-        "w": 16,
+        "h": 8,
+        "w": 12,
         "x": 0,
         "y": 1
       },
@@ -164,11 +145,11 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"cdd-bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"drift_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"driftlens_score\" or r[\"_field\"] == \"mcddd_score\" or r[\"_field\"] == \"driftlens_threshold\")\n  |> keep(columns: [\"_time\", \"_field\", \"_value\"])\n",
+          "query": "from(bucket: \"cdd-bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"drift_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"driftlens_score\" or r[\"_field\"] == \"driftlens_threshold\")\n  |> keep(columns: [\"_time\", \"_field\", \"_value\"])\n",
           "refId": "A"
         }
       ],
-      "title": "DriftLens Score vs Time",
+      "title": "Panel 1: DriftLens Score vs Time",
       "type": "timeseries"
     },
     {
@@ -176,7 +157,126 @@
         "type": "influxdb",
         "uid": "InfluxDB_Flux"
       },
-      "description": "Active binary drift alarm states (0 = Normal, 1 = Alarm).",
+      "description": "MCD-DD Minimum Covariance Determinant drift score evaluated on its distinct metric scale.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "MCD-DD Score",
+            "axisPlacement": "auto",
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1.17
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mcddd_score"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "MCD-DD Score"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#8F3BB8",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mcddd_threshold"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "MCD-DD Alarm Threshold"
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "dash": [10, 10],
+                  "fill": "dash"
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#E02F44",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "id": 2,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"cdd-bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"drift_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"mcddd_score\" or r[\"_field\"] == \"mcddd_threshold\")\n  |> keep(columns: [\"_time\", \"_field\", \"_value\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Panel 2: MCD-DD Score vs Time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Flux"
+      },
+      "description": "Detector alarm states and combined agreement categorization over event time.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -190,14 +290,34 @@
             {
               "options": {
                 "0": {
-                  "color": "green",
+                  "color": "#808080",
                   "index": 0,
-                  "text": "NORMAL"
+                  "text": "REFERENCE"
                 },
                 "1": {
-                  "color": "red",
+                  "color": "#299C46",
                   "index": 1,
-                  "text": "DRIFT ALARM"
+                  "text": "NORMAL / NEITHER"
+                },
+                "2": {
+                  "color": "#3274D9",
+                  "index": 2,
+                  "text": "DRIFTLENS ONLY"
+                },
+                "3": {
+                  "color": "#8F3BB8",
+                  "index": 3,
+                  "text": "MCD-DD ONLY"
+                },
+                "4": {
+                  "color": "#E02F44",
+                  "index": 4,
+                  "text": "BOTH DRIFT"
+                },
+                "5": {
+                  "color": "#FF780A",
+                  "index": 5,
+                  "text": "MCD-DD MISSING"
                 }
               },
               "type": "value"
@@ -207,11 +327,11 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#299C46",
                 "value": null
               },
               {
-                "color": "red",
+                "color": "#E02F44",
                 "value": 1
               }
             ]
@@ -221,12 +341,44 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "agreement_code"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Detector Agreement Status"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "driftlens_alarm"
             },
             "properties": [
               {
                 "id": "displayName",
-                "value": "DriftLens Alarm"
+                "value": "DriftLens Alarm (FDD)"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "#299C46",
+                        "index": 0,
+                        "text": "NORMAL"
+                      },
+                      "1": {
+                        "color": "#E02F44",
+                        "index": 1,
+                        "text": "DRIFT ALARM"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
               }
             ]
           },
@@ -239,18 +391,38 @@
               {
                 "id": "displayName",
                 "value": "MCD-DD Alarm"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "#299C46",
+                        "index": 0,
+                        "text": "NORMAL"
+                      },
+                      "1": {
+                        "color": "#E02F44",
+                        "index": 1,
+                        "text": "DRIFT ALARM"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
               }
             ]
           }
         ]
       },
       "gridPos": {
-        "h": 9,
-        "w": 8,
-        "x": 16,
-        "y": 1
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
       },
-      "id": 2,
+      "id": 3,
       "options": {
         "mergeValues": true,
         "rowHeight": 0.8,
@@ -266,12 +438,294 @@
             "type": "influxdb",
             "uid": "InfluxDB_Flux"
           },
-          "query": "from(bucket: \"cdd-bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"drift_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"driftlens_alarm\" or r[\"_field\"] == \"mcddd_alarm\")\n  |> keep(columns: [\"_time\", \"_field\", \"_value\"])\n",
+          "query": "from(bucket: \"cdd-bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"drift_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"agreement_code\" or r[\"_field\"] == \"driftlens_alarm\" or r[\"_field\"] == \"mcddd_alarm\")\n  |> keep(columns: [\"_time\", \"_field\", \"_value\"])\n",
           "refId": "A"
         }
       ],
-      "title": "Drift Alarms",
+      "title": "Panel 3: Detector Agreement & Alarm States",
       "type": "state-timeline"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Flux"
+      },
+      "description": "Tabular investigation log of windows, detector scores, normalized threshold ratios, and agreement status.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "_time"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Window Time"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "window_id"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Window ID"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "agreement"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Agreement"
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "mode": "gradient",
+                  "type": "color-background"
+                }
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "both": {
+                        "color": "#E02F44",
+                        "index": 0,
+                        "text": "BOTH DRIFT"
+                      },
+                      "driftlens_only": {
+                        "color": "#3274D9",
+                        "index": 1,
+                        "text": "DRIFTLENS ONLY"
+                      },
+                      "mcddd_only": {
+                        "color": "#8F3BB8",
+                        "index": 2,
+                        "text": "MCD-DD ONLY"
+                      },
+                      "neither": {
+                        "color": "#299C46",
+                        "index": 3,
+                        "text": "NEITHER"
+                      },
+                      "reference": {
+                        "color": "#808080",
+                        "index": 4,
+                        "text": "REFERENCE"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "driftlens_ratio"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "DL Ratio (Score/Thr)"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "driftlens_score"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "DriftLens Score"
+              },
+              {
+                "id": "decimals",
+                "value": 4
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "driftlens_alarm"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "DL Alarm"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "green",
+                        "index": 0,
+                        "text": "NO"
+                      },
+                      "1": {
+                        "color": "red",
+                        "index": 1,
+                        "text": "YES"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mcddd_ratio"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "MCD Ratio (Score/Thr)"
+              },
+              {
+                "id": "unit",
+                "value": "none"
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mcddd_score"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "MCD-DD Score"
+              },
+              {
+                "id": "decimals",
+                "value": 4
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mcddd_alarm"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "MCD Alarm"
+              },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "0": {
+                        "color": "green",
+                        "index": 0,
+                        "text": "NO"
+                      },
+                      "1": {
+                        "color": "purple",
+                        "index": 1,
+                        "text": "YES"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": true,
+          "fields": "",
+          "reducer": ["count"],
+          "show": true
+        },
+        "showHeader": true,
+        "sortBy": [
+          {
+            "desc": true,
+            "displayName": "Window Time"
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"cdd-bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"drift_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] =~ /^(driftlens_score|driftlens_alarm|driftlens_ratio|mcddd_score|mcddd_alarm|mcddd_ratio)$/)\n  |> toFloat()\n  |> group()\n  |> pivot(rowKey: [\"_time\", \"window_id\", \"agreement\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> sort(columns: [\"_time\"], desc: true)\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Panel 4: Drift Alarm Investigation & Disagreement Table",
+      "type": "table"
     },
     {
       "collapsed": false,
@@ -279,9 +733,141 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 10
+        "y": 17
       },
       "id": 101,
+      "title": "Tweet Stream Characteristics & Explainability",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "InfluxDB_Flux"
+      },
+      "description": "Total tweets ingested per window vs tweets sampled/evaluated by the detector.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Post Count",
+            "axisPlacement": "auto",
+            "fillOpacity": 25,
+            "gradientMode": "opacity",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto",
+            "spanNulls": false
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "n_posts"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Total Window Posts (n_posts)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#56A64B",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "n_used"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Evaluated Posts (n_used)"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#1F60C4",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 18
+      },
+      "id": 5,
+      "options": {
+        "legend": {
+          "calcs": ["mean", "max", "lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "InfluxDB_Flux"
+          },
+          "query": "from(bucket: \"cdd-bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"drift_metrics\")\n  |> filter(fn: (r) => r[\"_field\"] == \"n_posts\" or r[\"_field\"] == \"n_used\")\n  |> keep(columns: [\"_time\", \"_field\", \"_value\"])\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Panel 5: Tweet Volume (Total vs Used Posts)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "grafana",
+        "uid": "-- Grafana --"
+      },
+      "description": "Executive summary and navigation portal for the Drift Explainability & Semantic Shift Engine.",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 18
+      },
+      "id": 10,
+      "options": {
+        "content": "### 🔬 Person 4: Drift Explainability Portal\n\nWhenever concept drift is detected, our explainability pipeline extracts **semantic themes**, **distinctive keyword shifts**, and **representative centroid tweets** to answer *why* the detectors alarmed.\n\n---\n\n#### 📊 Detector Consensus Summary\n- **154 Windows Total** (14 Reference, 140 Stream Windows)\n- **Both Detectors Alarmed (`both`)**: **10 windows** — *High-confidence semantic regime changes (June 2021 surge)*\n- **DriftLens Only (`driftlens_only`)**: **110 windows** — *High sensitivity to fine embedding subspace shifts*\n- **MCD-DD Only (`mcddd_only`)**: **2 windows** — *Covariance outlier shifts detected in early May 2020*\n- **Neither Alarmed (`neither`)**: **18 windows** — *Quiescent baseline behavior*\n\n---\n\n#### 🚀 Interactive Explainability UI\nLaunch the companion standalone web viewer to interactively inspect before/after cards and keyword clouds:\n\n```bash\n# From repository root:\npython3 -m http.server 5050\n# Open: http://localhost:5050/monitoring/explainability_viewer.html\n```\n\n**Generated Explainability Artifacts:**\n- `output/drift/explainability_report.json` — Structured JSON report with top emerging/fading terms & centroid tweets.\n- `output/drift/disagreement_table.csv` — Full tabular record of detector alarms and ratio discrepancies.\n",
+        "mode": "markdown"
+      },
+      "title": "Panel 10: Drift Explainability & Semantic Shift Portal",
+      "type": "text"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 102,
       "title": "System Performance & Resource Metrics",
       "type": "row"
     },
@@ -294,7 +880,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "yellow",
+            "fixedColor": "#FF9830",
             "mode": "fixed"
           },
           "custom": {
@@ -318,9 +904,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 11
+        "y": 27
       },
-      "id": 3,
+      "id": 6,
       "options": {
         "legend": {
           "calcs": ["mean", "max", "lastNotNull"],
@@ -343,7 +929,7 @@
           "refId": "A"
         }
       ],
-      "title": "Processing Latency",
+      "title": "Panel 6: Processing Latency",
       "type": "timeseries"
     },
     {
@@ -355,7 +941,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "green",
+            "fixedColor": "#73BF69",
             "mode": "fixed"
           },
           "custom": {
@@ -379,9 +965,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 11
+        "y": 27
       },
-      "id": 4,
+      "id": 7,
       "options": {
         "legend": {
           "calcs": ["mean", "max", "lastNotNull"],
@@ -404,7 +990,7 @@
           "refId": "A"
         }
       ],
-      "title": "Throughput",
+      "title": "Panel 7: Throughput",
       "type": "timeseries"
     },
     {
@@ -438,15 +1024,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "#299C46",
                 "value": null
               },
               {
-                "color": "orange",
+                "color": "#FF9830",
                 "value": 70
               },
               {
-                "color": "red",
+                "color": "#E02F44",
                 "value": 85
               }
             ]
@@ -458,9 +1044,9 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 19
+        "y": 35
       },
-      "id": 5,
+      "id": 8,
       "options": {
         "legend": {
           "calcs": ["mean", "max", "lastNotNull"],
@@ -483,7 +1069,7 @@
           "refId": "A"
         }
       ],
-      "title": "CPU Usage",
+      "title": "Panel 8: CPU Usage",
       "type": "timeseries"
     },
     {
@@ -495,7 +1081,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "semi-dark-blue",
+            "fixedColor": "#3274D9",
             "mode": "fixed"
           },
           "custom": {
@@ -519,9 +1105,9 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 19
+        "y": 35
       },
-      "id": 6,
+      "id": 9,
       "options": {
         "legend": {
           "calcs": ["mean", "max", "lastNotNull"],
@@ -544,14 +1130,14 @@
           "refId": "A"
         }
       ],
-      "title": "Memory Usage",
+      "title": "Panel 9: Memory Usage",
       "type": "timeseries"
     }
   ],
   "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["cdd", "drift", "influxdb"],
+  "tags": ["cdd", "drift", "influxdb", "explainability"],
   "time": {
     "from": "2020-01-01T00:00:00.000Z",
     "to": "now"
@@ -568,5 +1154,5 @@
   "timezone": "browser",
   "title": "Concept Drift & System Performance Monitoring",
   "uid": "cdd-concept-drift-monitoring",
-  "version": 1
+  "version": 2
 }

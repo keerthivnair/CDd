@@ -1,0 +1,386 @@
+{
+  "timestamp": "2026-10-09T06:42:29.263745+00:00",
+  "source_detector_file": "output/drift/driftlens.jsonl",
+  "windows_source": "MISSING (windows_all.jsonl)",
+  "total_windows": 154,
+  "stream_windows": 140,
+  "agreement_summary": {
+    "mcddd_only": 2,
+    "neither": 18,
+    "driftlens_only": 110,
+    "both": 10
+  },
+  "selected_windows_count": 10,
+  "selected_explanations": [
+    {
+      "window_id": 18387,
+      "window_start": "2020-05-05T00:00:00",
+      "agreement": "mcddd_only",
+      "detector_metrics": {
+        "driftlens_score": 0.024158,
+        "driftlens_threshold": 0.029583,
+        "driftlens_ratio": 0.8166,
+        "driftlens_alarm": false,
+        "mcddd_score": 2.03173,
+        "mcddd_threshold": 1.1741,
+        "mcddd_ratio": 1.7305,
+        "mcddd_alarm": true
+      },
+      "detector_rationale": "MCD-DD alarmed (ratio: 1.73) due to high discrepancy against its immediate contrastive context windows. DriftLens remained quiet (ratio: 0.82 <= 1.0) because the sample distribution remained within its conservative p99 baseline boundary.",
+      "tweet_data_available": false,
+      "before_drift": {
+        "window_id": 18386,
+        "window_start": "2020-05-04T00:00:00",
+        "tweet_volume": 4949,
+        "representative_tweets": []
+      },
+      "after_drift": {
+        "window_id": 18387,
+        "window_start": "2020-05-05T00:00:00",
+        "tweet_volume": 4949,
+        "n_used": 1000,
+        "representative_tweets": []
+      },
+      "what_changed": {
+        "emerging_keywords": [],
+        "fading_keywords": [],
+        "semantic_summary": "DATA DEPENDENCY NOTICE: 'windows_all.jsonl' is not present in the local repository. Original tweet text is required to extract word-level semantic shifts. Provide 'windows_all.jsonl' to display live tweet texts.",
+        "change_type": "abrupt"
+      },
+      "selection_reason": "mcddd_only_disagreement"
+    },
+    {
+      "window_id": 18388,
+      "window_start": "2020-05-06T00:00:00",
+      "agreement": "mcddd_only",
+      "detector_metrics": {
+        "driftlens_score": 0.024134,
+        "driftlens_threshold": 0.029583,
+        "driftlens_ratio": 0.8158,
+        "driftlens_alarm": false,
+        "mcddd_score": 1.67572,
+        "mcddd_threshold": 1.1741,
+        "mcddd_ratio": 1.4272,
+        "mcddd_alarm": true
+      },
+      "detector_rationale": "MCD-DD alarmed (ratio: 1.43) due to high discrepancy against its immediate contrastive context windows. DriftLens remained quiet (ratio: 0.82 <= 1.0) because the sample distribution remained within its conservative p99 baseline boundary.",
+      "tweet_data_available": false,
+      "before_drift": {
+        "window_id": 18387,
+        "window_start": "2020-05-05T00:00:00",
+        "tweet_volume": 4575,
+        "representative_tweets": []
+      },
+      "after_drift": {
+        "window_id": 18388,
+        "window_start": "2020-05-06T00:00:00",
+        "tweet_volume": 4575,
+        "n_used": 1000,
+        "representative_tweets": []
+      },
+      "what_changed": {
+        "emerging_keywords": [],
+        "fading_keywords": [],
+        "semantic_summary": "DATA DEPENDENCY NOTICE: 'windows_all.jsonl' is not present in the local repository. Original tweet text is required to extract word-level semantic shifts. Provide 'windows_all.jsonl' to display live tweet texts.",
+        "change_type": "abrupt"
+      },
+      "selection_reason": "mcddd_only_disagreement"
+    },
+    {
+      "window_id": 18743,
+      "window_start": "2021-04-26T00:00:00",
+      "agreement": "both",
+      "detector_metrics": {
+        "driftlens_score": 0.06587,
+        "driftlens_threshold": 0.029583,
+        "driftlens_ratio": 2.2266,
+        "driftlens_alarm": true,
+        "mcddd_score": 1.80004,
+        "mcddd_threshold": 1.1741,
+        "mcddd_ratio": 1.5331,
+        "mcddd_alarm": true
+      },
+      "detector_rationale": "Both detectors agreed on drift. DriftLens FDD score (0.0659) exceeded its threshold by 122.7%, while MCD-DD discrepancy (1.8000) exceeded its threshold by 53.3%.",
+      "tweet_data_available": false,
+      "before_drift": {
+        "window_id": 18555,
+        "window_start": "2020-10-20T00:00:00",
+        "tweet_volume": 3318,
+        "representative_tweets": []
+      },
+      "after_drift": {
+        "window_id": 18743,
+        "window_start": "2021-04-26T00:00:00",
+        "tweet_volume": 3318,
+        "n_used": 1000,
+        "representative_tweets": []
+      },
+      "what_changed": {
+        "emerging_keywords": [],
+        "fading_keywords": [],
+        "semantic_summary": "DATA DEPENDENCY NOTICE: 'windows_all.jsonl' is not present in the local repository. Original tweet text is required to extract word-level semantic shifts. Provide 'windows_all.jsonl' to display live tweet texts.",
+        "change_type": "abrupt"
+      },
+      "selection_reason": "consensus_major_drift"
+    },
+    {
+      "window_id": 18804,
+      "window_start": "2021-06-26T00:00:00",
+      "agreement": "both",
+      "detector_metrics": {
+        "driftlens_score": 0.069639,
+        "driftlens_threshold": 0.029583,
+        "driftlens_ratio": 2.354,
+        "driftlens_alarm": true,
+        "mcddd_score": 1.47867,
+        "mcddd_threshold": 1.1741,
+        "mcddd_ratio": 1.2594,
+        "mcddd_alarm": true
+      },
+      "detector_rationale": "Both detectors agreed on drift. DriftLens FDD score (0.0696) exceeded its threshold by 135.4%, while MCD-DD discrepancy (1.4787) exceeded its threshold by 25.9%.",
+      "tweet_data_available": false,
+      "before_drift": {
+        "window_id": 18802,
+        "window_start": "2021-06-24T00:00:00",
+        "tweet_volume": 1850,
+        "representative_tweets": []
+      },
+      "after_drift": {
+        "window_id": 18804,
+        "window_start": "2021-06-26T00:00:00",
+        "tweet_volume": 1850,
+        "n_used": 1000,
+        "representative_tweets": []
+      },
+      "what_changed": {
+        "emerging_keywords": [],
+        "fading_keywords": [],
+        "semantic_summary": "DATA DEPENDENCY NOTICE: 'windows_all.jsonl' is not present in the local repository. Original tweet text is required to extract word-level semantic shifts. Provide 'windows_all.jsonl' to display live tweet texts.",
+        "change_type": "abrupt"
+      },
+      "selection_reason": "consensus_major_drift"
+    },
+    {
+      "window_id": 18796,
+      "window_start": "2021-06-18T00:00:00",
+      "agreement": "both",
+      "detector_metrics": {
+        "driftlens_score": 0.064926,
+        "driftlens_threshold": 0.029583,
+        "driftlens_ratio": 2.1947,
+        "driftlens_alarm": true,
+        "mcddd_score": 1.28373,
+        "mcddd_threshold": 1.1741,
+        "mcddd_ratio": 1.0934,
+        "mcddd_alarm": true
+      },
+      "detector_rationale": "Both detectors agreed on drift. DriftLens FDD score (0.0649) exceeded its threshold by 119.5%, while MCD-DD discrepancy (1.2837) exceeded its threshold by 9.3%.",
+      "tweet_data_available": false,
+      "before_drift": {
+        "window_id": 18795,
+        "window_start": "2021-06-17T00:00:00",
+        "tweet_volume": 2771,
+        "representative_tweets": []
+      },
+      "after_drift": {
+        "window_id": 18796,
+        "window_start": "2021-06-18T00:00:00",
+        "tweet_volume": 2771,
+        "n_used": 1000,
+        "representative_tweets": []
+      },
+      "what_changed": {
+        "emerging_keywords": [],
+        "fading_keywords": [],
+        "semantic_summary": "DATA DEPENDENCY NOTICE: 'windows_all.jsonl' is not present in the local repository. Original tweet text is required to extract word-level semantic shifts. Provide 'windows_all.jsonl' to display live tweet texts.",
+        "change_type": "abrupt"
+      },
+      "selection_reason": "consensus_major_drift"
+    },
+    {
+      "window_id": 18548,
+      "window_start": "2020-10-13T00:00:00",
+      "agreement": "both",
+      "detector_metrics": {
+        "driftlens_score": 0.053116,
+        "driftlens_threshold": 0.029583,
+        "driftlens_ratio": 1.7955,
+        "driftlens_alarm": true,
+        "mcddd_score": 1.50111,
+        "mcddd_threshold": 1.1741,
+        "mcddd_ratio": 1.2785,
+        "mcddd_alarm": true
+      },
+      "detector_rationale": "Both detectors agreed on drift. DriftLens FDD score (0.0531) exceeded its threshold by 79.6%, while MCD-DD discrepancy (1.5011) exceeded its threshold by 27.8%.",
+      "tweet_data_available": false,
+      "before_drift": {
+        "window_id": 18547,
+        "window_start": "2020-10-12T00:00:00",
+        "tweet_volume": 2492,
+        "representative_tweets": []
+      },
+      "after_drift": {
+        "window_id": 18548,
+        "window_start": "2020-10-13T00:00:00",
+        "tweet_volume": 2492,
+        "n_used": 1000,
+        "representative_tweets": []
+      },
+      "what_changed": {
+        "emerging_keywords": [],
+        "fading_keywords": [],
+        "semantic_summary": "DATA DEPENDENCY NOTICE: 'windows_all.jsonl' is not present in the local repository. Original tweet text is required to extract word-level semantic shifts. Provide 'windows_all.jsonl' to display live tweet texts.",
+        "change_type": "abrupt"
+      },
+      "selection_reason": "consensus_major_drift"
+    },
+    {
+      "window_id": 18792,
+      "window_start": "2021-06-14T00:00:00",
+      "agreement": "driftlens_only",
+      "detector_metrics": {
+        "driftlens_score": 0.103045,
+        "driftlens_threshold": 0.029583,
+        "driftlens_ratio": 3.4833,
+        "driftlens_alarm": true,
+        "mcddd_score": 1.11683,
+        "mcddd_threshold": 1.1741,
+        "mcddd_ratio": 0.9512,
+        "mcddd_alarm": false
+      },
+      "detector_rationale": "DriftLens alarmed (ratio: 3.48) due to cumulative distribution shift away from the fixed April 2020 baseline. MCD-DD did not alarm (ratio: 0.95 <= 1.0) because its 10-window rolling context adapts to gradual transitions.",
+      "tweet_data_available": false,
+      "before_drift": {
+        "window_id": 18791,
+        "window_start": "2021-06-13T00:00:00",
+        "tweet_volume": 4293,
+        "representative_tweets": []
+      },
+      "after_drift": {
+        "window_id": 18792,
+        "window_start": "2021-06-14T00:00:00",
+        "tweet_volume": 4293,
+        "n_used": 1000,
+        "representative_tweets": []
+      },
+      "what_changed": {
+        "emerging_keywords": [],
+        "fading_keywords": [],
+        "semantic_summary": "DATA DEPENDENCY NOTICE: 'windows_all.jsonl' is not present in the local repository. Original tweet text is required to extract word-level semantic shifts. Provide 'windows_all.jsonl' to display live tweet texts.",
+        "change_type": "abrupt"
+      },
+      "selection_reason": "driftlens_only_gradual_drift"
+    },
+    {
+      "window_id": 18537,
+      "window_start": "2020-10-02T00:00:00",
+      "agreement": "driftlens_only",
+      "detector_metrics": {
+        "driftlens_score": 0.163784,
+        "driftlens_threshold": 0.059377,
+        "driftlens_ratio": 2.7584,
+        "driftlens_alarm": true,
+        "mcddd_score": 2.16781,
+        "mcddd_threshold": 3.0113,
+        "mcddd_ratio": 0.7199,
+        "mcddd_alarm": false
+      },
+      "detector_rationale": "DriftLens alarmed (ratio: 2.76) due to cumulative distribution shift away from the fixed April 2020 baseline. MCD-DD did not alarm (ratio: 0.72 <= 1.0) because its 10-window rolling context adapts to gradual transitions.",
+      "tweet_data_available": false,
+      "before_drift": {
+        "window_id": 18536,
+        "window_start": "2020-10-01T00:00:00",
+        "tweet_volume": 413,
+        "representative_tweets": []
+      },
+      "after_drift": {
+        "window_id": 18537,
+        "window_start": "2020-10-02T00:00:00",
+        "tweet_volume": 413,
+        "n_used": 413,
+        "representative_tweets": []
+      },
+      "what_changed": {
+        "emerging_keywords": [],
+        "fading_keywords": [],
+        "semantic_summary": "DATA DEPENDENCY NOTICE: 'windows_all.jsonl' is not present in the local repository. Original tweet text is required to extract word-level semantic shifts. Provide 'windows_all.jsonl' to display live tweet texts.",
+        "change_type": "abrupt"
+      },
+      "selection_reason": "driftlens_only_gradual_drift"
+    },
+    {
+      "window_id": 18540,
+      "window_start": "2020-10-05T00:00:00",
+      "agreement": "driftlens_only",
+      "detector_metrics": {
+        "driftlens_score": 0.079375,
+        "driftlens_threshold": 0.029583,
+        "driftlens_ratio": 2.6831,
+        "driftlens_alarm": true,
+        "mcddd_score": 1.6977,
+        "mcddd_threshold": 3.0113,
+        "mcddd_ratio": 0.5638,
+        "mcddd_alarm": false
+      },
+      "detector_rationale": "DriftLens alarmed (ratio: 2.68) due to cumulative distribution shift away from the fixed April 2020 baseline. MCD-DD did not alarm (ratio: 0.56 <= 1.0) because its 10-window rolling context adapts to gradual transitions.",
+      "tweet_data_available": false,
+      "before_drift": {
+        "window_id": 18539,
+        "window_start": "2020-10-04T00:00:00",
+        "tweet_volume": 1334,
+        "representative_tweets": []
+      },
+      "after_drift": {
+        "window_id": 18540,
+        "window_start": "2020-10-05T00:00:00",
+        "tweet_volume": 1334,
+        "n_used": 1000,
+        "representative_tweets": []
+      },
+      "what_changed": {
+        "emerging_keywords": [],
+        "fading_keywords": [],
+        "semantic_summary": "DATA DEPENDENCY NOTICE: 'windows_all.jsonl' is not present in the local repository. Original tweet text is required to extract word-level semantic shifts. Provide 'windows_all.jsonl' to display live tweet texts.",
+        "change_type": "abrupt"
+      },
+      "selection_reason": "driftlens_only_gradual_drift"
+    },
+    {
+      "window_id": 18389,
+      "window_start": "2020-05-07T00:00:00",
+      "agreement": "neither",
+      "detector_metrics": {
+        "driftlens_score": 0.021879,
+        "driftlens_threshold": 0.029583,
+        "driftlens_ratio": 0.7396,
+        "driftlens_alarm": false,
+        "mcddd_score": 0.603095,
+        "mcddd_threshold": 1.1741,
+        "mcddd_ratio": 0.5137,
+        "mcddd_alarm": false
+      },
+      "detector_rationale": "Neither detector observed significant distribution movement beyond normal random variation.",
+      "tweet_data_available": false,
+      "before_drift": {
+        "window_id": 18388,
+        "window_start": "2020-05-06T00:00:00",
+        "tweet_volume": 4553,
+        "representative_tweets": []
+      },
+      "after_drift": {
+        "window_id": 18389,
+        "window_start": "2020-05-07T00:00:00",
+        "tweet_volume": 4553,
+        "n_used": 1000,
+        "representative_tweets": []
+      },
+      "what_changed": {
+        "emerging_keywords": [],
+        "fading_keywords": [],
+        "semantic_summary": "DATA DEPENDENCY NOTICE: 'windows_all.jsonl' is not present in the local repository. Original tweet text is required to extract word-level semantic shifts. Provide 'windows_all.jsonl' to display live tweet texts.",
+        "change_type": "gradual"
+      },
+      "selection_reason": "consensus_normal_benchmark"
+    }
+  ]
+}
